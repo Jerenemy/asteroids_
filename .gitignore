@@ -1,0 +1,17 @@
+# exclude all files
+*
+
+# except
+!.gitignore
+!README.md
+!asteroids_v23.py
+!Classes
+!Classes/*.py
+!Assets
+!Assets/AsteroidSounds
+!Assets/AsteroidSounds/*.wav
+!Assets/Fonts
+!Assets/Fonts/*.otf
+!Assets/Fonts/*.ttf
+!Assets/Fonts/*.TTF
+!Assets/TextFiles
