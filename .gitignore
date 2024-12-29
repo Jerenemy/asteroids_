@@ -2,16 +2,27 @@
 *
 
 # except
+# core
 !.gitignore
 !README.md
-!asteroids_v23.py
-!Classes
-!Classes/*.py
-!Assets
-!Assets/AsteroidSounds
-!Assets/AsteroidSounds/*.wav
-!Assets/Fonts
-!Assets/Fonts/*.otf
-!Assets/Fonts/*.ttf
-!Assets/Fonts/*.TTF
-!Assets/TextFiles
+!main.py
+# assets
+!assets
+!assets/fonts
+!assets/fonts/*
+!assets/sounds
+!assets/sounds/*
+# data
+!data
+# engine
+!engine
+!engine/*.py
+# entities
+!entities
+!entities/*.py
+# graphics
+!graphics
+!graphics/*.py
+# utils
+!utils
+!utils/*.py
