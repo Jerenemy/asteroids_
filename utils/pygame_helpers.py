@@ -1,4 +1,4 @@
-from pygame import quit, key, mouse, event, QUIT, K_q
+from pygame import quit, key, mouse, QUIT, K_q
 from sys import exit
 
 def cleanup():
@@ -29,9 +29,6 @@ def check_quit(event):
         return True
 
 
-    
-# could 
-    
 class KeyManager:
     """manages whether or not we are allowed to return a true event when detecting that a key has been pressed"""
     def __init__(self, key):
@@ -47,6 +44,6 @@ class KeyManager:
                 return True
             else: return False 
         else:
-            # detect key unpress when kp[key_input] == False
+            # detect key unpress when kp[self.key] == False
             self.recently_allowed = False
             return False

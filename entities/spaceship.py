@@ -1,14 +1,8 @@
 import pygame as pg
 from math import cos, sin, pi, sqrt, asin, atan
-import random
 from entities import SpaceEntity
 from utils import WHITE, BLACK, ACCELERATION, DEG2RAD, RAD2DEG, ROTATE, X_SCRNSIZE, Y_SCRNSIZE, DECELERATION, Line, is_key_pressed, UserSpaceshipPolygon
-"""bang_sship_auto_destroy = pg.mixer.Sound(os.path.join('Asteroids', 'AsteroidSounds', 'bangSmall.wav'))
-bang_sship_destroy = pg.mixer.Sound(os.path.join('Asteroids', 'AsteroidSounds', 'bangMedium.wav'))
 
-bang_sship_auto_destroy = pg.mixer.Sound(os.path.join('AsteroidSounds', 'bangSmall.wav'))
-bang_sship_destroy = pg.mixer.Sound(os.path.join('AsteroidSounds', 'bangMedium.wav'))
-"""
 
 class Spaceship(SpaceEntity):
     def __init__(self, x, y, size, speed, direction, color, screen, width=3, orientation=0):
@@ -29,7 +23,7 @@ class Spaceship(SpaceEntity):
             a = ACCELERATION
             c = self.speed
             B = 180 - (self.orientation - self.direction)
-            new_speed = sqrt( (a ** 2) + (c ** 2) - (2 * a * c * cos(B * DEG2RAD)))
+            new_speed = sqrt((a ** 2) + (c ** 2) - (2 * a * c * cos(B * DEG2RAD)))
             #account for division by zero error
             #maybe fixed by using law of sines with angle on bottom, maybe not though
             if new_speed != 0:
@@ -272,19 +266,7 @@ class Spaceship(SpaceEntity):
             self.invulnerability = 0
             self.invulnerability_counter = 0
             self.invulnerability_counter_color = 0
-            
-    # #Method check_distance in Class Spaceship - check asteroids distance against spaceship    
-    # def check_distance(self, space_object_list):       
-    #     i = 0
-    #     while i < len(space_object_list):   
-    #         d = sqrt(((space_object_list[i].x - self.x) ** 2) + ((space_object_list[i].y - self.y) ** 2) )
-    #         if d < space_object_list[i].size + self.size:
-    #             return(1)            
-    #         i = i + 1
-    #     return(0)
 
-    
-    
 
     def score_display(self):
 

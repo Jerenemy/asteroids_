@@ -212,8 +212,8 @@ class DisplayText(DisplayElement):
 
 
 class DisplayTitleText(DisplayText):
-    def __init_subclass__(cls):
-        return super().__init_subclass__()
+    def __init__(self, text, font, color, position, offset):
+        super().__init__(text, font, color, position, offset)
 
 
 class DebugValue(DisplayElement):

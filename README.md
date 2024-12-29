@@ -26,3 +26,34 @@ Modularized code to have more subfolders:
 
 3. use ABC for every single type of thing
 
+## Update 2: 28/12/24
+Significantly improved overall structure, modularized, simplified, etc.
+
+**graphics**: contains all graphics-related implementation, eg animations, hud, title, game_over
+
+**entities**: improved ABC structure of each entity. Included a should_despawn method.
+
+*asteroid.py*: added self.polygon attribute to init RandomPolygon object to modularize display
+
+*spaceship.py*: also added polygon attribute. This will help with displaying lives in corner.
+
+
+**utils**: utils are coming along swimmingly
+
+*geometry.py*: Implemented shape classes for asteroid and spaceeship.
+
+*pygame_helpers.py*: Implemented detecting one event when a key is pressed by instantiating an object for the key in question. 
+
+## Steps
+1. Asteroid destruction sequence (splitting)
+2. Spaceship destruction sequence
+3. Finish updating spaceship.py 
+4. Spaceship rocket
+5. Spaceship invincibility
+2. game_over screen and play again ability
+3. Increasing difficulty
+4. Pause functionality
+5. Animations 
+6. Sounds
+9. Automated spaceships
+10. Make asteroids look better
