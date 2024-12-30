@@ -12,8 +12,7 @@ class Spaceship(SpaceEntity):
         self.invulnerable = False
         self.rocket_color = WHITE
         self.screen = screen
-        self.rocket_counter = 0 # TODO: REMOVE LATER
-        self.display_rocket = 0 # TODO: REMOVE LATER
+        self.is_destroying = False
 
     def should_despawn(self):
         return False
@@ -49,21 +48,22 @@ class Spaceship(SpaceEntity):
     def move(self): 
         self.x = self.x + (self.speed * cos(pi / 180 * (self.direction - 90) ))
         self.y = self.y + (self.speed * sin(pi / 180 * (self.direction - 90) ))
-        if is_key_pressed(pg.K_UP):
-            self.render_rocket() 
-            self.accelerate()
-        else:
-            self.decelerate()
-        if is_key_pressed(pg.K_LEFT):
-            if self.orientation < ROTATE:
-                self.orientation = self.orientation + 360 - ROTATE
+        if not self.is_destroying:
+            if is_key_pressed(pg.K_UP):
+                # self.render_rocket() 
+                self.accelerate()
             else:
-                self.orientation = self.orientation - ROTATE
-        if is_key_pressed(pg.K_RIGHT):
-            if self.orientation > 360 - ROTATE:
-                self.orientation = self.orientation - 360 + ROTATE
-            else:
-                self.orientation = self.orientation + ROTATE
+                self.decelerate()
+            if is_key_pressed(pg.K_LEFT):
+                if self.orientation < ROTATE:
+                    self.orientation = self.orientation + 360 - ROTATE
+                else:
+                    self.orientation = self.orientation - ROTATE
+            if is_key_pressed(pg.K_RIGHT):
+                if self.orientation > 360 - ROTATE:
+                    self.orientation = self.orientation - 360 + ROTATE
+                else:
+                    self.orientation = self.orientation + ROTATE
         if self.x < 0: self.x = self.x + X_SCRNSIZE
         if self.x > X_SCRNSIZE: self.x = self.x - X_SCRNSIZE
         if self.y < 0: self.y = self.y + Y_SCRNSIZE
@@ -75,164 +75,49 @@ class Spaceship(SpaceEntity):
 
     #Method display in Class Spaceship
     def render(self, screen):
-        self.polygon.render(screen)
+        if not self.is_destroying:
+            self.polygon.render(screen)
         
-    def render_rocket(self):
-        #ROCKETS
-        x_rocket = self.x + ((self.size * 1.4) * cos(pi / 180 * (180 + self.orientation - 90) ))
-        y_rocket = self.y + ((self.size * 1.4) * sin(pi / 180 * (180 + self.orientation - 90) ))
+    # def render_rocket(self):
+    #     #ROCKETS
+    #     x_rocket = self.x + ((self.size * 1.4) * cos(pi / 180 * (180 + self.orientation - 90) ))
+    #     y_rocket = self.y + ((self.size * 1.4) * sin(pi / 180 * (180 + self.orientation - 90) ))
         
-        x_rocketleft = self.x + ((self.size * .8) * cos(pi / 180 * (180 + 20 + self.orientation - 90) ))
-        y_rocketleft = self.y + ((self.size * .8) * sin(pi / 180 * (180 + 20 + self.orientation - 90) ))    
+    #     x_rocketleft = self.x + ((self.size * .8) * cos(pi / 180 * (180 + 20 + self.orientation - 90) ))
+    #     y_rocketleft = self.y + ((self.size * .8) * sin(pi / 180 * (180 + 20 + self.orientation - 90) ))    
         
-        x_rocketright = self.x + ((self.size * .8) * cos(pi / 180 * (180 - 20 + self.orientation - 90) ))
-        y_rocketright = self.y + ((self.size * .8) * sin(pi / 180 * (180 - 20 + self.orientation - 90) ))
+    #     x_rocketright = self.x + ((self.size * .8) * cos(pi / 180 * (180 - 20 + self.orientation - 90) ))
+    #     y_rocketright = self.y + ((self.size * .8) * sin(pi / 180 * (180 - 20 + self.orientation - 90) ))
   
-        #rocket_width = 2
-        if not self.invulnerable:
-            if self.rocket_counter <= 2:
-                self.rocket_color = WHITE
-            if self.rocket_counter > 2:
-                self.rocket_color = BLACK
+    #     #rocket_width = 2
+    #     if not self.invulnerable:
+    #         if self.rocket_counter <= 2:
+    #             self.rocket_color = WHITE
+    #         if self.rocket_counter > 2:
+    #             self.rocket_color = BLACK
             
-            self.rocket_counter += 1
+    #         self.rocket_counter += 1
 
-            if self.rocket_counter >= 4:
-                self.rocket_counter = 0
-
-
-        if self.display_rocket == 1:
-            pg.draw.polygon(self.screen, self.rocket_color, [(x_rocket, y_rocket), (x_rocketleft, y_rocketleft), (x_rocketright, y_rocketright)], self.width)
-            self.rocket = 0
+    #         if self.rocket_counter >= 4:
+    #             self.rocket_counter = 0
 
 
-    def destroy(self, screen):
-        
-        #INITIAL LINES
+    #     if self.display_rocket == 1:
+    #         pg.draw.polygon(self.screen, self.rocket_color, [(x_rocket, y_rocket), (x_rocketleft, y_rocketleft), (x_rocketright, y_rocketright)], self.width)
+    #         self.rocket = 0
 
-        #line 1
-        #front left of spacecraft
-        x_frontleft = self.x + (self.size * cos(pi / 180 * ( self.orientation - 90) )) 
-        y_frontleft = self.y + (self.size * sin(pi / 180 * ( self.orientation - 90) )) 
-        #end left of spacecraft
-        x_endleft = self.x + ((self.size * 1.4) * cos(pi / 180 * (200 + self.orientation - 90) )) 
-        y_endleft = self.y + ((self.size * 1.4) * sin(pi / 180 * (200 + self.orientation - 90) ))  
-        
-        #line 2
-        #front right of spacecraft
-        x_frontright = self.x + (self.size * cos(pi / 180 * (self.orientation - 90) )) 
-        y_frontright = self.y + (self.size * sin(pi / 180 * (self.orientation - 90) )) 
-        #end right of spacecraft
-        x_endright = self.x + ((self.size * 1.4) * cos(pi / 180 * (160 + self.orientation - 90) )) 
-        y_endright = self.y + ((self.size * 1.4) * sin(pi / 180 * (160 + self.orientation - 90) ))  
-
-        #line 3
-        #back left of spacecraft
-        x_backleft = self.x + ((self.size * .8) * cos(pi / 180 * (205 + self.orientation - 90) )) 
-        y_backleft = self.y + ((self.size * .8) * sin(pi / 180 * (205 + self.orientation - 90) )) 
-        #back right of spacecraft
-        x_backright = self.x + ((self.size * .8) * cos(pi / 180 * (155 + self.orientation - 90) )) 
-        y_backright = self.y + ((self.size * .8) * sin(pi / 180 * (155 + self.orientation - 90) )) 
-  
-        
-        #NEW LINES
-
-        #speed of destruction of spaceship (higher #, slower speed traveled)
-        #destroy_dis = 100
-        #max distance of destruction of spaceship (lower #, further distance)
-        #destroy_dis1 = 1.5
-
-        destroy_angle1 = -90
-        destroy_angle2 = 90
-        destroy_angle3 = 180
-
-        #speed and distance of destruction of spaceship formula
-        #destroy_dis_sship = (self.destroy_counter / destroy_dis1) * (self.end_destroy_counter /  (self.destroy_counter + destroy_dis) )
-        destroy_dis_sship = self.destroy_counter
-
-        #new line 1 position
-        x_frontleft = x_frontleft + ( destroy_dis_sship )  * cos(pi / 180 * (self.orientation - 90 + destroy_angle1) )
-        y_frontleft = y_frontleft + ( destroy_dis_sship )  * sin(pi / 180 * (self.orientation - 90 + destroy_angle1) )
-        
-        x_endleft = x_endleft + ( destroy_dis_sship )  * cos(pi / 180 * (self.orientation - 90 + destroy_angle1) )
-        y_endleft = y_endleft + ( destroy_dis_sship )  * sin(pi / 180 * (self.orientation - 90 + destroy_angle1) )
-        
-        #new line 2 position
-        x_frontright = x_frontright + ( destroy_dis_sship )  * cos(pi / 180 * (self.orientation - 90 + destroy_angle2) )
-        y_frontright = y_frontright + ( destroy_dis_sship )  * sin(pi / 180 * (self.orientation - 90 + destroy_angle2) )
-        
-        x_endright = x_endright + ( destroy_dis_sship )  * cos(pi / 180 * (self.orientation - 90 + destroy_angle2) )
-        y_endright = y_endright + ( destroy_dis_sship )  * sin(pi / 180 * (self.orientation - 90 + destroy_angle2) )
-        
-        #new line 3 position
-        x_backleft = x_backleft + ( destroy_dis_sship )  * cos(pi / 180 * (self.orientation - 90 + destroy_angle3) )
-        y_backleft = y_backleft + ( destroy_dis_sship )  * sin(pi / 180 * (self.orientation - 90 + destroy_angle3) )
-        
-        x_backright = x_backright + ( destroy_dis_sship )  * cos(pi / 180 * (self.orientation - 90 + destroy_angle3) )
-        y_backright = y_backright + ( destroy_dis_sship )  * sin(pi / 180 * (self.orientation - 90 + destroy_angle3) )
-        
-        destroy_counter_ratio = self.destroy_counter/self.end_destroy_counter
-        end_color_destroy_counter = self.end_destroy_counter/2
-        destroy_counter_color_ratio = self.destroy_counter/end_color_destroy_counter
-        
-        if destroy_counter_color_ratio <= 1:
-            destroy_color = ( (255 - destroy_counter_color_ratio * 255), (255 - destroy_counter_color_ratio * 255), (255 - destroy_counter_color_ratio * 255))
-        else: 
-            destroy_color = ( 0, 0, 0 )
-
-        #line1 = pg.draw.line(SCREEN, destroy_color, [x_frontleft, y_frontleft], [x_endleft, y_endleft], self.width)
-        #line2 = pg.draw.line(SCREEN, destroy_color, [x_frontright, y_frontright], [x_endright, y_endright], self.width)
-        #line3 = pg.draw.line(SCREEN, destroy_color, [x_backleft, y_backleft], [x_backright, y_backright], self.width)
-
-        line1 = Line(x_frontleft, y_frontleft, x_endleft, y_endleft, destroy_color)
-        line2 = Line(x_frontright, y_frontright, x_endright, y_endright, destroy_color)
-        line3 = Line(x_backleft, y_backleft, x_backright, y_backright, destroy_color)
-        
-
-        angle = self.destroy_counter
-        
-        #dt = 10
-        #clock = pg.time.Clock()"""
-        #angle = 0.5 * dt
-        
-        line1.rotate(2.5*angle)
-        line1.draw(screen)
-        line2.rotate(-2.5*angle)
-        line2.draw(screen)
-        line3.rotate(6*angle)
-        line3.draw(screen)
-
-        #dt = clock.tick(60) + 10
-        if self.paused_true == 0:
-            self.destroy_counter += 1
-        if self.destroy_counter == 1 and self.paused_true == 0:
-            self.spaceship_destroy_sound_play = 1
-
-        
-
-        #self.speed = 0
-
-        if self.destroy_counter >= self.end_destroy_counter:
-            self.x = X_SCRNSIZE/2
-            self.y = Y_SCRNSIZE/2
-            self.direction = 0
-            self.orientation = 0
-            self.speed = 0
-            destroy_color = WHITE
-            self.destroy_counter = 0
-            self.lives = self.lives - 1
-            self.destroy_spaceship = 0
-            self.rocket = 0
-            self.hit = 0
-            # self.invulnerability = 1
-            self.color = WHITE
 
 
     def destroy(self):
-        self.x = X_SCRNSIZE/2
-        self.y = Y_SCRNSIZE/2
-        self.speed = 0
-        self.orientation = 0
+
+        if not self.is_destroying:
+            self.x = X_SCRNSIZE/2
+            self.polygon.center_x = X_SCRNSIZE/2
+            self.y = Y_SCRNSIZE/2
+            self.polygon.center_y = Y_SCRNSIZE/2
+            self.speed = 0
+            self.orientation = 0
+            self.polygon.orientation = 0
         
     def make_invulnerable(self):
         # if self.invulnerability == 1 and self.paused_true == 0:
@@ -351,24 +236,6 @@ class Spaceship(SpaceEntity):
             self.lives = 3
             self.start_game = 1
 
-    # def check_distance_bullets(self, bullet_list):       
-    #         i = 0
-    #         while i < len(bullet_list):   
-    #             d = sqrt(((bullet_list[i].x - self.x) ** 2) + ((bullet_list[i].y - self.y) ** 2) )
-    #             if d <= bullet_list[i].size + self.size:
-    #                 self.hit = 1
-    #                 #self.speed = 0
-    #                 return(1)
-    #             i = i + 1
-    #         return(0)
-
-    def reset_counters(self):
-        self.invulnerability = 0
-        self.invulnerability_counter = 0
-        self.invulnerability_counter_color = 0
-        self.destroy_spaceship = 0
-        self.destroy_counter = 0
-        
 
 class UserSpaceship(Spaceship):
     def __init__(self, x, y, size, speed, direction, color, screen, width=3, orientation=0):

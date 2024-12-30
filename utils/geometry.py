@@ -48,13 +48,13 @@ class Polygon(ABC):
     
     @property
     @abstractmethod
-    def _vertices(self):
+    def vertices(self):
         """Calculate vertices of the polygon."""
         pass
     
     def render(self, screen):
         """Draw the polygon on the given screen."""
-        pg.draw.polygon(screen, self.color, self._vertices, self.width)
+        pg.draw.polygon(screen, self.color, self.vertices, self.width)
     
     def move(self, dx, dy):
         """Move the polygon by a certain offset."""
@@ -81,7 +81,7 @@ class RandomPolygon(Polygon):
         self.radii = radii or [base_radius] * sides
 
     @property
-    def _vertices(self):
+    def vertices(self):
         """Calculate vertices of the polygon with varying radii."""
         angle_increment = 2 * pi / self.sides
         vertices = []
@@ -103,7 +103,7 @@ class UserSpaceshipPolygon(Polygon):
         self.orientation = orientation
         
     @property
-    def _vertices(self):
+    def vertices(self):
         """Calculate vertices of the polygon with specific radii to form the spaceship 'A' shape."""
         #define coordinate for front of spacecraft
         x_front = self.center_x + (self.size * cos(pi / 180 * (self.orientation - 90) ))

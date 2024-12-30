@@ -13,6 +13,7 @@ class Asteroid(SpaceEntity):
         self.sides = 8
         self.polygon = RandomPolygon(x, y, size, self.sides, color, 3, self._radii)
         self.points = 10 if size > 30 else 100
+        self.min_size = 30
         
     def should_despawn(self):
         return self.is_out_of_bounds
@@ -68,24 +69,9 @@ class Asteroid(SpaceEntity):
             direction = randint(270, 450)  # Angles to move rightward and onto the screen
         return x, y, direction, size
     
-    def check_distance(self, bullet_list):       
-        """#Method check_distance in Class Asteroid - check asteroid distance against bullet list"""    
-        i = 0
-        while i < len(bullet_list):   
-            d = sqrt(((bullet_list[i].x_coord - self.x_coord) ** 2) + ((bullet_list[i].y_coord - self.y_coord) ** 2) )
-            if d <= bullet_list[i].size + self.size:
-                self.hit = 1
-                #self.speed = 0
-                return(1)
-            i = i + 1
-        return(0)
-
-    def check_distance_spaceship(self, spaceship):       
-        """#not being used"""
-        d = sqrt(((spaceship.x_coord - self.x_coord) ** 2) + ((spaceship.y_coord - self.y_coord) ** 2) )
-        if d <= spaceship.size + self.size:
-            self.hit = 1
-            #self.speed = 0
-            return(1)
-        return(0)
-        
+    def split(self):
+        if self.size >= self.min_size*2:
+            ast1 = Asteroid(self.x, self.y, self.size//2, self.direction+45, self.color)
+            ast2 = Asteroid(self.x, self.y, self.size//2, self.direction-45, self.color)
+            return (ast1, ast2)
+        return (None, None)

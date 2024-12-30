@@ -1,10 +1,10 @@
 import pygame as pg
-from graphics import Display, AnimationManager, ExplosionAnimation
+from graphics import Display, AnimationManager, ExplosionAnimation, UserSpaceshipDeathAnimation
 from .object_manager import ObjectManager
 from entities import UserSpaceship, Asteroid, Bullet
 from .high_scores_manager import HighScoresManager
 from .time_manager import TimeManager
-from utils import AssetManager, X_SCRNSIZE, Y_SCRNSIZE, is_key_pressed, is_mouse_pressed, check_quit, choose_color, WHITE, BULLET_SPEED, KeyManager
+from utils import AssetManager, X_SCRNSIZE, Y_SCRNSIZE, is_key_pressed, is_mouse_pressed, check_quit, choose_color, WHITE, BULLET_SPEED, KeyManager, SSHIP_DESTRUCTION_DURATION
 
 class GameState:
     """
@@ -81,15 +81,19 @@ class GameState:
         collision_events = self.object_manager.get_collision_events()
         for event in collision_events:
             if event['type'] == 'bullet_hit_asteroid':
-                self.add_score(100)
+                # self.object_manager.
+                self.add_score(event['points'])
                 # Trigger animation
                 self.animation_manager.add_animation(
                     ExplosionAnimation(event['x'], event['y'], event['size'], event['duration'])
                 )
             elif event['type'] == 'user_spaceship_hit':
-                # self.animation_manager.add_animation(
-                #     SpaceshipDeathAnimation()
-                # )
+                sship = event['spaceship']
+                sship.is_destroying = True  # Set the state flag
+                self.animation_manager.add_animation(
+                    UserSpaceshipDeathAnimation(sship, SSHIP_DESTRUCTION_DURATION)
+                    # UserSpaceshipDeathAnimation(sship, 200, sship.orientation, sship.polygon)
+                )
                 self.lose_life()
 
     def render_game(self):
@@ -99,8 +103,8 @@ class GameState:
         if self.state == "menu":
             self.display.render_title_screen()
         elif self.state == "playing":
-            self.object_manager.render_objects(self.screen)
             self.animation_manager.render_animations(self.screen)  # Render animations
+            self.object_manager.render_objects(self.screen)
             self.display.render_hud(self.score, self.lives)
         elif self.state == "paused":
             self.display.render_paused()

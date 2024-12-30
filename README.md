@@ -45,7 +45,7 @@ Significantly improved overall structure, modularized, simplified, etc.
 *pygame_helpers.py*: Implemented detecting one event when a key is pressed by instantiating an object for the key in question. 
 
 ## Steps
-1. Asteroid destruction sequence (splitting)
+1. Asteroid destruction sequence (splitting) DONE
 2. Spaceship destruction sequence
 3. Finish updating spaceship.py 
 4. Spaceship rocket
@@ -57,3 +57,16 @@ Significantly improved overall structure, modularized, simplified, etc.
 6. Sounds
 9. Automated spaceships
 10. Make asteroids look better
+11. Add sigmoidal rotation function
+
+## Next
+Resolve bug of spaceship destroy animation: I believe it is due to passing reference (list) instead of copy (immutable tuple) 
+
+Also need to have Spaceship not display during the duration of the spaceship destruction sequence. Could do this by editing Spaceship.destroy(), but that seems like a bad solution, since then have to keep track of both timers simultaneously and they need to be synced. Possible, but is there a better solution?
+
+Done!!!
+
+## Next
+1. Base rotation off of spaceship speed, have them not all always rotate same direction.
+2. Do spaceship rocket.
+3. All other stuff

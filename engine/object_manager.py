@@ -80,21 +80,27 @@ class ObjectManager:
         if isinstance(obj1, Bullet) and isinstance(obj2, Asteroid):
             self.remove_object(obj1)
             self.remove_object(obj2)
+            ast1, ast2 = obj2.split()
+            if ast1 and ast2:
+                self.add_object(ast1)
+                self.add_object(ast2)
             return {
                 'type': 'explosion',
                 'x': obj2.x,
                 'y': obj2.y,
                 'size': obj2.size,
+                'points': obj2.points,
                 'duration': 30  # Example duration
             }
         elif isinstance(obj1, Spaceship) and isinstance(obj2, Asteroid):
-            obj1.destroy()
-            self.remove_object(obj2)
-            if isinstance(obj1, UserSpaceship):
-                return {
-                    'type': 'user_spaceship_hit', 
-                    'spaceship': obj1, 
-                    'asteroid': obj2
-                }
+            # obj1.destroy()
+            if not obj1.is_destroying:
+                self.remove_object(obj2)
+                if isinstance(obj1, UserSpaceship):
+                    return {
+                        'type': 'user_spaceship_hit', 
+                        'spaceship': obj1, 
+                        'asteroid': obj2
+                    }
             # elif isinstance(obj1, EnemySpaceship):
         return None  # No significant event
