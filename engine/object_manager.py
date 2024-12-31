@@ -24,7 +24,7 @@ class ObjectManager:
         ]
     
     def get_user_spaceship(self):
-        return get_list_item_by_type(self.objects["spaceships"], UserSpaceship)
+        return get_list_item_by_type(self.objects["spaceships"], UserSpaceship) # TODO: have friendly and enemy spaceships stored in sub-dictionary, 
     
     def get_object_type_key(self, obj) -> str:
         """Get the object type key for a given object."""
@@ -85,7 +85,7 @@ class ObjectManager:
                 self.add_object(ast1)
                 self.add_object(ast2)
             return {
-                'type': 'explosion',
+                'type': 'bullet_hit_asteroid',
                 'x': obj2.x,
                 'y': obj2.y,
                 'size': obj2.size,

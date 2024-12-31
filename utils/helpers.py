@@ -1,5 +1,5 @@
 from random import choice
-from .constants import WHITE, YELLOW, ORANGE, RED, GREEN, BLUE, PURPLE
+from .constants import WHITE, YELLOW, ORANGE, RED, GREEN, BLUE, PURPLE, Y_SCRNSIZE
 
 
 def load_from_file(filepath):
@@ -39,3 +39,7 @@ class flicker:
         if self.counter >= 2 * self.duration:  # Reset counter after a full cycle
             self.counter = 0
         return result
+    
+     
+def translate_to_ratio(raw_val: int, scale_val=800, screen_size=Y_SCRNSIZE) -> int:
+    return int((raw_val/scale_val) * screen_size)

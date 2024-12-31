@@ -33,7 +33,7 @@ class HighScoresManager:
         Save high scores to the JSON file.
         """
         try:
-            with open(self.file_path, 'w') as file:
+            with open(self.file_path, 'w') as file: #switch to append?
                 json.dump(self.high_scores, file, indent=4)
         except IOError as e:
             print(f"Error saving high scores: {e}")
@@ -68,7 +68,17 @@ class HighScoresManager:
         """
         sorted_scores = sorted(self.high_scores.items(), key=lambda item: item[1], reverse=True)
         return sorted_scores[:limit]
+    
+    def get_top_score(self):
+        return self.get_top_scores()[0][1]
 
+    def is_high_score(self, score):
+        top_scores = self.get_top_scores()
+        if top_scores:
+            # print(score, top_scores[0])
+            return score > top_scores[0][1]
+        return True
+            
 # Example usage
 if __name__ == "__main__":
     manager = HighScoresManager()

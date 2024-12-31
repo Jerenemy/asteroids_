@@ -80,6 +80,9 @@ class UserSpaceshipDeathAnimation(Animation):
 
     def update(self):
         self.elapsed += 1
+        if self.elapsed == self.duration//2:
+            print("here")
+            self.spaceship.delay_game_over_display = False
         if self.elapsed >= self.duration:
             self.spaceship.is_destroying = False
             self.finished = True

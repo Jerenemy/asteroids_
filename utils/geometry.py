@@ -147,5 +147,3 @@ class RocketPolygon(UserSpaceshipPolygon):
         x_rocketright = self.center_x + ((self.size * .8) * cos(pi / 180 * (180 - 20 + self.orientation - 90) ))
         y_rocketright = self.center_y + ((self.size * .8) * sin(pi / 180 * (180 - 20 + self.orientation - 90) ))
         return [(x_rocket, y_rocket), (x_rocketleft, y_rocketleft), (x_rocketright, y_rocketright)]
-
-    

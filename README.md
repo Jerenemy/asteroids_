@@ -66,6 +66,17 @@ Also need to have Spaceship not display during the duration of the spaceship des
 
 ## Next
 1. Base rotation off of spaceship speed, have them not all always rotate same direction.
-2. Do spaceship rocket.
+2. Do spaceship rocket. DONE
 3. All other stuff
 4. clean up display.py
+
+## Next
+1. Make game over screen and play again
+
+# Bugs discovered:
+1. No time for destruction animation
+2. Spaceship added everytime restart, need to fix this either in start_game() only init-ing if necessary
+3. Displays are in wrong vertical position, need to be based off scrnsize
+4. Not displaying GAME OVER or CLICK TO PLAY
+5. High scores are not real
+

@@ -14,6 +14,8 @@ class Spaceship(SpaceEntity):
         self.rocket_color = WHITE
         self.screen = screen
         self.is_destroying = False
+        self.delay_game_over_display = False
+        self.lost_all_lives = True
         self.flicker = flicker(FLICKER_DURATION)
 
     def should_despawn(self):
@@ -76,7 +78,7 @@ class Spaceship(SpaceEntity):
     def synchronize_polygons(self, polygons: list[UserSpaceshipPolygon]):
         # TODO: potentially move this to utils and use for Asteroid too
         for polygon in polygons:
-            print(f"type(polygon) = {type(polygon)}, ({round(polygon.center_x, 2)}, {round(polygon.center_y, 2)}, {polygon.orientation}")
+            # print(f"type(polygon) = {type(polygon)}, ({round(polygon.center_x, 2)}, {round(polygon.center_y, 2)}, {polygon.orientation}")
             polygon.center_x = self.x
             polygon.center_y = self.y
             polygon.orientation = self.orientation
@@ -84,7 +86,7 @@ class Spaceship(SpaceEntity):
 
     #Method display in Class Spaceship
     def render(self, screen):
-        if not self.is_destroying:
+        if not self.is_destroying and not self.lost_all_lives:
             if is_key_pressed(pg.K_UP):
                 self.render_rocket(self.screen) 
             self.polygon.render(screen)
