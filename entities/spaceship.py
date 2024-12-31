@@ -1,7 +1,7 @@
 import pygame as pg
 from math import cos, sin, pi, sqrt, asin, atan
 from entities import SpaceEntity
-from utils import WHITE, BLACK, ACCELERATION, DEG2RAD, RAD2DEG, ROTATE, X_SCRNSIZE, Y_SCRNSIZE, DECELERATION, Line, is_key_pressed, UserSpaceshipPolygon,  flicker, RocketPolygon, FLICKER_DURATION
+from utils import WHITE, BLACK, ACCELERATION, DEG2RAD, RAD2DEG, ROTATE, X_SCRNSIZE, Y_SCRNSIZE, DECELERATION, is_key_pressed, UserSpaceshipPolygon, flicker, RocketPolygon, FLICKER_DURATION
 
 
 class Spaceship(SpaceEntity):

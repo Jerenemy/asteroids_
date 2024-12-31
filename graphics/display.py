@@ -125,7 +125,8 @@ class Display:
             custom_font_path=None,
             color=WHITE
         ):
-        font_obj = self.get_font(font_name, font_size, custom_font_path=custom_font_path)
+        coords = (translate_to_ratio(coords[0]), translate_to_ratio(coords[1]))
+        font_obj = self.get_font(font_name, translate_to_ratio(font_size), custom_font_path=custom_font_path)
         disp_el = DisplayText(
             str(value),
             font_obj,
@@ -153,35 +154,35 @@ class Display:
             element.render(self.screen)
     
     def score_high_score_elements(self, points: int, level: int, points_high_score: int, level_high_score: int) -> list:
-        element_size = translate_to_ratio(50)
+        element_size = 50
         game_over_hud = [
-            self.craft_element(points, element_size, 'upper_right', (translate_to_ratio(-10), translate_to_ratio(10))),
-            self.craft_element(level, element_size, 'upper_left', (translate_to_ratio(10), translate_to_ratio(10)))
+            self.craft_element(points, element_size, 'upper_right', (-10, 10)),
+            self.craft_element(level, element_size, 'upper_left', (10, 10))
         ]
-        high_score_text_height = translate_to_ratio(-Y_SCRNSIZE/2+40)
-        high_score_text_size = translate_to_ratio(15)
-        points_level_text_height = high_score_text_height + translate_to_ratio(high_score_text_size+7) 
-        high_score_size = translate_to_ratio(30)
-        high_score_height = points_level_text_height + high_score_size
+        high_score_text_height = -Y_SCRNSIZE/2+40
+        high_score_text_size = 15
+        points_level_text_height = high_score_text_height + translate_to_ratio(high_score_text_size+7)
+        high_score_size = 30
+        high_score_height = points_level_text_height + translate_to_ratio(high_score_size)
         stats = [
-            self.craft_element("HIGH SCORE", translate_to_ratio(20), "center", (0, high_score_text_height)),
-            self.craft_element("LEVEL", high_score_text_size, "center", (translate_to_ratio(-50), points_level_text_height)),
-            self.craft_element("POINTS", high_score_text_size, "center", (translate_to_ratio(50), points_level_text_height)),
-            self.craft_element(level_high_score, high_score_size, 'center', (translate_to_ratio(-45), high_score_height)),
-            self.craft_element(points_high_score, high_score_size, 'center', (translate_to_ratio(45), high_score_height))
+            self.craft_element("HIGH SCORE", 20, "center", (0, high_score_text_height)),
+            self.craft_element("LEVEL", high_score_text_size, "center", (-50, points_level_text_height)),
+            self.craft_element("POINTS", high_score_text_size, "center", (50, points_level_text_height)),
+            self.craft_element(level_high_score, high_score_size, 'center', (-45, high_score_height)),
+            self.craft_element(points_high_score, high_score_size, 'center', (45, high_score_height))
         ]
         return game_over_hud + stats 
 
     def game_over_elements(self, is_destroying: bool, delay: bool, points: int, level: int, points_high_score: int, level_high_score: int) -> list: 
         if not delay:
-            element_size = translate_to_ratio(50)
+            element_size = 50
             game_over_text = [
-                self.craft_element('GAME OVER', translate_to_ratio(100), 'center', (0, translate_to_ratio(-10)))
+                self.craft_element('GAME OVER', 100, 'center', (0, -10))
             ]
-            game_over_hud = [self.craft_element(points, element_size, 'upper_right', (translate_to_ratio(-10), translate_to_ratio(10)))]
+            game_over_hud = [self.craft_element(points, element_size, 'upper_right', (-10, 10))]
             if not is_destroying:
                 game_over_hud = self.score_high_score_elements(points, level, points_high_score, level_high_score)
-                game_over_text.append(self.craft_element('CLICK TO PLAY', translate_to_ratio(30), 'center', (0, translate_to_ratio(65))))
+                game_over_text.append(self.craft_element('CLICK TO PLAY', 30, 'center', (0, 65)))
         else:
             game_over_text = []
             game_over_hud = []
@@ -189,9 +190,9 @@ class Display:
             
     def set_title_elements(self, points_high_score, level_high_score, points=0, level=1):
         self.title_elements = [
-            self.craft_element('ASTEROIDS', translate_to_ratio(150), 'center', (0, translate_to_ratio(-40))),
-            self.craft_element('Jeremy Zay', translate_to_ratio(50), 'center', (0, translate_to_ratio((DisplayElement.y_scrnsize()/2)-(translate_to_ratio(120)))), font_name='signature', custom_font_path='signature.otf'),
-            self.craft_element('CLICK TO PLAY', translate_to_ratio(30), 'center', (0, translate_to_ratio(65)))
+            self.craft_element('ASTEROIDS', (150), 'center', (0, -40)),
+            self.craft_element('Jeremy Zay', (50), 'center', (0, (DisplayElement.y_scrnsize()/2)-translate_to_ratio(120)), font_name='signature', custom_font_path='signature.otf'),
+            self.craft_element('CLICK TO PLAY', (30), 'center', (0, 65))
         ]
         self.title_elements += self.score_high_score_elements(points, level, points_high_score, level_high_score)
         
