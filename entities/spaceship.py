@@ -17,6 +17,8 @@ class Spaceship(SpaceEntity):
         self.delay_game_over_display = False
         self.lost_all_lives = True
         self.flicker = flicker(FLICKER_DURATION)
+        self.x_scrnsize = X_SCRNSIZE
+        self.y_scrnsize = Y_SCRNSIZE
 
     def should_despawn(self):
         return False
@@ -68,11 +70,12 @@ class Spaceship(SpaceEntity):
                     self.orientation = self.orientation - 360 + ROTATE
                 else:
                     self.orientation = self.orientation + ROTATE
-        x_scrnsize, y_scrnsize = pg.display.get_window_size()
-        if self.x < 0: self.x = self.x + x_scrnsize
-        if self.x > x_scrnsize: self.x = self.x - x_scrnsize
-        if self.y < 0: self.y = self.y + y_scrnsize
-        if self.y > y_scrnsize: self.y = self.y - y_scrnsize
+        self.update_scrnsize()
+        # x_scrnsize, y_scrnsize = pg.display.get_window_size()
+        if self.x < 0: self.x = self.x + self.x_scrnsize
+        if self.x > self.x_scrnsize: self.x = self.x - self.x_scrnsize
+        if self.y < 0: self.y = self.y + self.y_scrnsize
+        if self.y > self.y_scrnsize: self.y = self.y - self.y_scrnsize
         # synchronize updated coords and orientation with sship's polygon
         self.synchronize_polygons([self.polygon, self.rocket_polygon])
     
@@ -84,6 +87,11 @@ class Spaceship(SpaceEntity):
             polygon.center_y = self.y
             polygon.orientation = self.orientation
             
+    def update_scrnsize(self):
+        try:
+            self.x_scrnsize, self.y_scrnsize = pg.display.get_window_size()
+        except Exception as e:
+            print(f"exception\n\n{e}")
 
     #Method display in Class Spaceship
     def render(self, screen):
@@ -100,12 +108,13 @@ class Spaceship(SpaceEntity):
             # need to have easier way to upgrade all of polygon's coords w/ spaceship. in sship.move, needs to automatically do this, here I just add it to a list of all features of the sship.
 
     def destroy(self):
-        x_scrnsize, y_scrnsize = pg.display.get_window_size()
+        # self.update_scrnsize()
+        # x_scrnsize, y_scrnsize = pg.display.get_window_size()
         if not self.is_destroying:
-            self.x = x_scrnsize/2
-            self.polygon.center_x = x_scrnsize/2
-            self.y = y_scrnsize/2
-            self.polygon.center_y = y_scrnsize/2
+            self.x = self.x_scrnsize/2
+            self.polygon.center_x = self.x_scrnsize/2
+            self.y = self.y_scrnsize/2
+            self.polygon.center_y = self.y_scrnsize/2
             self.speed = 0
             self.orientation = 0
             self.polygon.orientation = 0
@@ -142,92 +151,7 @@ class Spaceship(SpaceEntity):
             self.invulnerability = 0
             self.invulnerability_counter = 0
             self.invulnerability_counter_color = 0
-
-
-    def score_display(self):
-
-        SCORE_FONT = pg.font.SysFont('keyboard', 50)
-
-        score_text = SCORE_FONT.render( str(self.score), 1, WHITE)
-        SCREEN.blit(score_text, ((X_SCRNSIZE - score_text.get_width() - 40), (score_text.get_height() - 30)))
-
-
-    def game_over(self):
-        WINNER_FONT = pg.font.SysFont('keyboard', 100)
-        WINNER_TEXT = "GAME OVER"
-        
-        draw_text = WINNER_FONT.render(WINNER_TEXT, 1, WHITE)
-        SCREEN.blit(draw_text, (X_SCRNSIZE/2 - draw_text.get_width() / 2, Y_SCRNSIZE/2 - draw_text.get_height() / 2 - 10))
-        
-        
-
-    def restart(self, event):
-        RESTART_FONT = pg.font.SysFont('keyboard', 30)
-        RESTART_TEXT = "CLICK TO PLAY"
-        draw_text1 = RESTART_FONT.render(RESTART_TEXT, 1, WHITE)
-        SCREEN.blit(draw_text1, (X_SCRNSIZE/2 - draw_text1.get_width() / 2, Y_SCRNSIZE/2 - draw_text1.get_height()/2 + 65))
-        
-        keys_pressed = pg.key.get_pressed()        
-
-        if event.type == pg.MOUSEBUTTONDOWN or keys_pressed[pg.K_SPACE]:
-            self.lives = 3
-            self.score = 0
-            self.refresh_screen = 1
-            self.game_over_true = 0
-            self.restart_tick_time = pg.time.get_ticks()
-            self.restart_counter_initiate = 1
-            # self.invulnerability = 0
-            self.invulnerability_counter = 0
-            self.color = WHITE
-
-
-            
-    def restart_lives1(self, event):
-        RESTART_FONT = pg.font.SysFont('keyboard', 30)
-        RESTART_TEXT = "CLICK TO PLAY"
-        draw_text1 = RESTART_FONT.render(RESTART_TEXT, 1, WHITE)
-        SCREEN.blit(draw_text1, (X_SCRNSIZE/2 - draw_text1.get_width() / 2, Y_SCRNSIZE/2 - draw_text1.get_height()/2 + 65))
-        
-        keys_pressed = pg.key.get_pressed()        
-
-        if event.type == pg.MOUSEBUTTONDOWN or keys_pressed[pg.K_SPACE]:
-            self.lives = 1
-            self.score = 0
-            self.refresh_screen = 1
-            self.game_over_true = 0
-            self.restart_tick_time = pg.time.get_ticks()
-            self.restart_counter_initiate = 1
-            self.invulnerability = 0
-            self.invulnerability_counter = 0
-            self.color = WHITE
-
-
-    def display_high_score(self):
-        
-        if self.high_score < self.score:
-            self.high_score = self.score
-        HIGH_SCORE_FONT = pg.font.SysFont('keyboard', 20)
-        HIGH_SCORE_FONT1 = pg.font.SysFont('keyboard', 30)
-
-        HIGH_SCORE_TEXT1 = "HIGH SCORE" 
-        HIGH_SCORE_TEXT2 = str(self.high_score)
-        h1 = HIGH_SCORE_FONT.render(HIGH_SCORE_TEXT1, 1, WHITE)
-        h2 = HIGH_SCORE_FONT1.render(HIGH_SCORE_TEXT2, 1, WHITE)
-        SCREEN.blit(h1, ( X_SCRNSIZE/2 - h1.get_width()/2 , 40 + 0 ))
-        SCREEN.blit(h2, ( X_SCRNSIZE/2 - h2.get_width()/2 , 40 + h1.get_height()))
     
-    def start(self, event):
-
-        RESTART_FONT = pg.font.SysFont('keyboard', 30)
-        RESTART_TEXT = "CLICK TO PLAY"
-        draw_text1 = RESTART_FONT.render(RESTART_TEXT, 1, WHITE)
-        SCREEN.blit(draw_text1, (X_SCRNSIZE/2 - draw_text1.get_width() / 2, Y_SCRNSIZE/2 - draw_text1.get_height()/2 + 65))
-        
-        if event.type == pg.MOUSEBUTTONDOWN:
-            self.lives = 3
-            self.start_game = 1
-
-
 class UserSpaceship(Spaceship):
     def __init__(self, x, y, size, speed, direction, color, screen, width=3, orientation=0):
         super().__init__(x, y, size, speed, direction, color, screen, width, orientation)

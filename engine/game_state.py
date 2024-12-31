@@ -4,7 +4,8 @@ from .object_manager import ObjectManager
 from entities import UserSpaceship, Asteroid, Bullet
 from .high_scores_manager import HighScoresManager
 from .time_manager import TimeManager
-from utils import AssetManager, X_SCRNSIZE, Y_SCRNSIZE, is_mouse_pressed, check_quit, choose_color, WHITE, BULLET_SPEED, KeyManager, SSHIP_DESTRUCTION_DURATION, SPACEBAR, MAX_X_SCRNSIZE, MAX_Y_SCRNSIZE
+from utils import AssetManager, is_mouse_pressed, check_quit, choose_color, X_SCRNSIZE, Y_SCRNSIZE, WHITE, BULLET_SPEED, KeyManager, SSHIP_DESTRUCTION_DURATION, SPACEBAR, MAX_X_SCRNSIZE, MAX_Y_SCRNSIZE
+from graphics import DisplayElement
 
 class GameState:
     """
@@ -31,13 +32,32 @@ class GameState:
         self.time_manager = None # to be initialized upon game start  
         self.fullscreen = False
 
+    
+
     def get_high_score(self, score_type):
         # if score_type == 'points':
         if self.high_scores_manager.is_high_score(self.points):
             self.high_scores_manager.save_high_scores(self.points)
         return self.high_scores_manager.get_top_score()
         # elif score_type == 'level':
-            
+       
+    @property
+    def x_scrnsize(self):
+        try:
+            x, _ = pg.display.get_window_size()
+            return x
+        except Exception as e:
+            return X_SCRNSIZE
+    
+    @property
+    def y_scrnsize(self):
+        try:
+            _, y = pg.display.get_window_size()
+            return y
+        except Exception as e:
+            return Y_SCRNSIZE
+    
+    
         
     def toggle_fullscreen(self):
         """Toggle between fullscreen and windowed mode."""
@@ -97,8 +117,8 @@ class GameState:
         """
         if not self.time_manager.check_delta_time_elapsed():
             return
-        x_scrnsize, y_scrnsize = pg.display.get_window_size()
-        x, y, direction, size = Asteroid.generate_random_attributes(x_scrnsize, y_scrnsize)
+        # x_scrnsize, y_scrnsize = pg.display.get_window_size()
+        x, y, direction, size = Asteroid.generate_random_attributes(self.x_scrnsize, self.y_scrnsize)
         color = choose_color()
         asteroid = Asteroid(x, y, size, direction, color)
         self.object_manager.add_object(asteroid)
@@ -136,9 +156,9 @@ class GameState:
         self.object_manager.render_objects(self.screen)
         self.animation_manager.render_animations(self.screen)
         if self.state == "menu":
-            self.display.render_title_screen()
+            self.display.render_title_screen(self.get_high_score('points'), self.get_high_score('level'))
         elif self.state == "playing":
-            self.display.render_hud( self.points, self.lives)
+            self.display.render_hud(self.points, self.lives)
         elif self.state == "paused":
             self.display.render_paused()
         elif self.state == "game_over":
@@ -163,8 +183,10 @@ class GameState:
         self.points = 0
         print("Game started.")
         # if len(self.object_manager.objects.values()) != 0:
+        # x_scrnsize, y_scrnsize = pg.display.get_window_size()
+        # self.update_scrnsize()
         if not self.object_manager.objects['spaceships']:
-            self.object_manager.add_object(UserSpaceship(X_SCRNSIZE/2, Y_SCRNSIZE/2, 20, 0, 0, WHITE, self.screen))
+            self.object_manager.add_object(UserSpaceship(self.x_scrnsize/2, self.y_scrnsize/2, 20, 0, 0, WHITE, self.screen))
         self.object_manager.get_user_spaceship().lost_all_lives = False
         self.time_manager = TimeManager()
 
