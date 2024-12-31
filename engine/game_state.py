@@ -27,7 +27,9 @@ class GameState:
         self.object_manager = ObjectManager()  # Manages dynamic game objects
         self.animation_manager = AnimationManager()
         self.spacebar_manager = KeyManager(pg.K_SPACE)
+        self.f_key_manager = KeyManager(pg.K_f)
         self.time_manager = None # to be initialized upon game start  
+        self.fullscreen = False
 
     def get_high_score(self, score_type):
         # if score_type == 'points':
@@ -37,12 +39,22 @@ class GameState:
         # elif score_type == 'level':
             
         
+    def toggle_fullscreen(self):
+        if self.fullscreen:
+            self.screen = pg.display.set_mode((X_SCRNSIZE, Y_SCRNSIZE))  # Windowed mode
+            self.fullscreen = False
+        else:
+            self.screen = pg.display.set_mode((X_SCRNSIZE, Y_SCRNSIZE), pg.FULLSCREEN)
+            self.fullscreen = True
+
     def handle_events(self):
         """Process input and update the state accordingly."""
         for event in pg.event.get():
             if check_quit(event):
                 self.state = "exit"
                 return
+        if self.f_key_manager.is_key_pressed_once():
+            self.toggle_fullscreen()
         if self.state == "menu" and is_mouse_pressed(SPACEBAR):
             self.start_game()
         if self.state == "playing":
