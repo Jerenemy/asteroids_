@@ -86,11 +86,7 @@ class ObjectManager:
                 self.add_object(ast2)
             return {
                 'type': 'bullet_hit_asteroid',
-                'x': obj2.x,
-                'y': obj2.y,
-                'size': obj2.size,
-                'points': obj2.points,
-                'duration': 30  # Example duration
+                'asteroid': obj2,
             }
         elif isinstance(obj1, Spaceship) and isinstance(obj2, Asteroid):
             # obj1.destroy()

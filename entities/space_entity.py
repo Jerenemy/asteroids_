@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 import math
 from utils import X_SCRNSIZE, Y_SCRNSIZE
+from pygame import display
 
 
 class SpaceEntity(ABC):
@@ -38,9 +39,10 @@ class SpaceEntity(ABC):
     @property
     def is_out_of_bounds(self):
         """Check if the object is outside the screen boundaries."""
+        x_scrnsize, y_scrnsize = display.get_window_size()
         return (
-            self.x < -self.size or self.x > X_SCRNSIZE + self.size or
-            self.y < -self.size or self.y > Y_SCRNSIZE + self.size
+            self.x < -self.size or self.x > x_scrnsize + self.size or
+            self.y < -self.size or self.y > y_scrnsize + self.size
         )
 
     

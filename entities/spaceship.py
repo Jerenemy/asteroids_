@@ -68,10 +68,11 @@ class Spaceship(SpaceEntity):
                     self.orientation = self.orientation - 360 + ROTATE
                 else:
                     self.orientation = self.orientation + ROTATE
-        if self.x < 0: self.x = self.x + X_SCRNSIZE
-        if self.x > X_SCRNSIZE: self.x = self.x - X_SCRNSIZE
-        if self.y < 0: self.y = self.y + Y_SCRNSIZE
-        if self.y > Y_SCRNSIZE: self.y = self.y - Y_SCRNSIZE
+        x_scrnsize, y_scrnsize = pg.display.get_window_size()
+        if self.x < 0: self.x = self.x + x_scrnsize
+        if self.x > x_scrnsize: self.x = self.x - x_scrnsize
+        if self.y < 0: self.y = self.y + y_scrnsize
+        if self.y > y_scrnsize: self.y = self.y - y_scrnsize
         # synchronize updated coords and orientation with sship's polygon
         self.synchronize_polygons([self.polygon, self.rocket_polygon])
     
@@ -99,12 +100,12 @@ class Spaceship(SpaceEntity):
             # need to have easier way to upgrade all of polygon's coords w/ spaceship. in sship.move, needs to automatically do this, here I just add it to a list of all features of the sship.
 
     def destroy(self):
-
+        x_scrnsize, y_scrnsize = pg.display.get_window_size()
         if not self.is_destroying:
-            self.x = X_SCRNSIZE/2
-            self.polygon.center_x = X_SCRNSIZE/2
-            self.y = Y_SCRNSIZE/2
-            self.polygon.center_y = Y_SCRNSIZE/2
+            self.x = x_scrnsize/2
+            self.polygon.center_x = x_scrnsize/2
+            self.y = y_scrnsize/2
+            self.polygon.center_y = y_scrnsize/2
             self.speed = 0
             self.orientation = 0
             self.polygon.orientation = 0

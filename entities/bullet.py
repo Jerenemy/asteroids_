@@ -4,7 +4,7 @@ from math import cos, sin, pi
 
 
 class Bullet(SpaceEntity):
-    def __init__(self, x, y, size, speed, direction, color, lifetime=25):
+    def __init__(self, x, y, size, speed, direction, color, lifetime=40):
         super().__init__(x, y, size, speed, direction, color)
         self.lifetime = lifetime
     

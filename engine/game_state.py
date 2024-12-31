@@ -1,10 +1,10 @@
 import pygame as pg
-from graphics import Display, AnimationManager, ExplosionAnimation, UserSpaceshipDeathAnimation
+from graphics import Display, AnimationManager, ParticleExplosionAnimation, UserSpaceshipDeathAnimation
 from .object_manager import ObjectManager
 from entities import UserSpaceship, Asteroid, Bullet
 from .high_scores_manager import HighScoresManager
 from .time_manager import TimeManager
-from utils import AssetManager, X_SCRNSIZE, Y_SCRNSIZE, is_key_pressed, is_mouse_pressed, check_quit, choose_color, WHITE, BULLET_SPEED, KeyManager, SSHIP_DESTRUCTION_DURATION, SPACEBAR
+from utils import AssetManager, X_SCRNSIZE, Y_SCRNSIZE, is_mouse_pressed, check_quit, choose_color, WHITE, BULLET_SPEED, KeyManager, SSHIP_DESTRUCTION_DURATION, SPACEBAR, MAX_X_SCRNSIZE, MAX_Y_SCRNSIZE
 
 class GameState:
     """
@@ -40,12 +40,14 @@ class GameState:
             
         
     def toggle_fullscreen(self):
+        """Toggle between fullscreen and windowed mode."""
         if self.fullscreen:
             self.screen = pg.display.set_mode((X_SCRNSIZE, Y_SCRNSIZE))  # Windowed mode
             self.fullscreen = False
         else:
-            self.screen = pg.display.set_mode((X_SCRNSIZE, Y_SCRNSIZE), pg.FULLSCREEN)
+            self.screen = pg.display.set_mode((MAX_X_SCRNSIZE, MAX_Y_SCRNSIZE), pg.FULLSCREEN)
             self.fullscreen = True
+        # self.update_screen_size()
 
     def handle_events(self):
         """Process input and update the state accordingly."""
@@ -95,7 +97,8 @@ class GameState:
         """
         if not self.time_manager.check_delta_time_elapsed():
             return
-        x, y, direction, size = Asteroid.generate_random_attributes(X_SCRNSIZE, Y_SCRNSIZE)
+        x_scrnsize, y_scrnsize = pg.display.get_window_size()
+        x, y, direction, size = Asteroid.generate_random_attributes(x_scrnsize, y_scrnsize)
         color = choose_color()
         asteroid = Asteroid(x, y, size, direction, color)
         self.object_manager.add_object(asteroid)
@@ -107,11 +110,12 @@ class GameState:
         collision_events = self.object_manager.get_collision_events()
         for event in collision_events:
             if event['type'] == 'bullet_hit_asteroid':
+                ast = event['asteroid']
                 # self.object_manager.
-                self.add_score(event['points'])
+                self.add_score(ast.points)
                 # Trigger animation
                 self.animation_manager.add_animation(
-                    ExplosionAnimation(event['x'], event['y'], event['size'], event['duration'])
+                    ParticleExplosionAnimation(ast.x, ast.y, ast.color, particle_count=ast.size//8, max_lifetime=ast.size//8)
                 )
             elif event['type'] == 'user_spaceship_hit':
                 sship = event['spaceship']
@@ -120,6 +124,9 @@ class GameState:
                 self.animation_manager.add_animation(
                     UserSpaceshipDeathAnimation(sship, SSHIP_DESTRUCTION_DURATION)
                     # UserSpaceshipDeathAnimation(sship, 200, sship.orientation, sship.polygon)
+                )
+                self.animation_manager.add_animation(
+                    ParticleExplosionAnimation(sship.x, sship.y, sship.color, particle_count=(sship.size//4), max_lifetime=(sship.size))
                 )
                 self.lose_life()
 

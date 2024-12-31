@@ -1,4 +1,4 @@
-from pygame import quit, key, mouse, QUIT, K_q, time
+from pygame import quit, key, mouse, QUIT, K_q, time, display
 from sys import exit
 
 
@@ -48,3 +48,5 @@ class KeyManager:
             # detect key unpress when kp[self.key] == False
             self.recently_allowed = False
             return False
+
+# current_window_size = display.get_window_size()

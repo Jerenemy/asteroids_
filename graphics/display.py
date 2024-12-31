@@ -4,8 +4,11 @@ from utils import BLACK, WHITE, X_SCRNSIZE, Y_SCRNSIZE, translate_to_ratio
 import re
 from typing import Tuple
 
-
 class DisplayElement(ABC):
+    def __init__(self):
+        self.x_scrnsize = X_SCRNSIZE
+        self.y_scrnsize = Y_SCRNSIZE
+        self.update_scrnsize()
     """Abstract base class for all display elements."""
 
     @abstractmethod
@@ -13,21 +16,25 @@ class DisplayElement(ABC):
         """Render the element on the screen."""
         pass
     
-    @staticmethod
-    def _center_position(rendered_text):
+    def update_scrnsize(self):
+        try:
+            self.x_scrnsize, self.y_scrnsize = pg.display.get_window_size()
+            # print(self.x_scrnsize, self.y_scrnsize)
+        except Exception as e:
+            print(f"exception\n\n{e}")
+
+    def _center_position(self, rendered_text):
         return (
-            X_SCRNSIZE / 2 - rendered_text.get_width() / 2,
-            Y_SCRNSIZE / 2 - rendered_text.get_height() / 2
+            self.x_scrnsize / 2 - rendered_text.get_width() / 2,
+            self.y_scrnsize / 2 - rendered_text.get_height() / 2
         )
         
-    @staticmethod
-    def _upper_left_position():
+    def _upper_left_position(self):
         return (0, 0)
         
-    @staticmethod
-    def _upper_right_position(rendered_text):
+    def _upper_right_position(self, rendered_text):
         return (
-            X_SCRNSIZE - rendered_text.get_width(),
+            self.x_scrnsize - rendered_text.get_width(),
             0
         )
         
@@ -35,32 +42,30 @@ class DisplayElement(ABC):
     def _lower_left_position(rendered_text):
         return (
             0,
-            Y_SCRNSIZE - rendered_text.get_height()
+            self.y_scrnsize - rendered_text.get_height()
         )
         
     @staticmethod
     def _lower_right_position(rendered_text):
         return (
-            X_SCRNSIZE - rendered_text.get_width(),
-            Y_SCRNSIZE - rendered_text.get_height()
+            self.x_scrnsize - rendered_text.get_width(),
+            self.y_scrnsize - rendered_text.get_height()
         )
 
 
-    @staticmethod
-    def _default_position(position_type: str, rendered_text):
+    def _default_position(self, position_type: str, rendered_text):
         if position_type == "center":
-            return DisplayElement._center_position(rendered_text)
+            return self._center_position(rendered_text)
         elif position_type == "upper_left":
-            return DisplayElement._upper_left_position()
+            return self._upper_left_position()
         elif position_type == "lower_left":
-            return DisplayElement._lower_left_position(rendered_text)
+            return self._lower_left_position(rendered_text)
         elif position_type == "upper_right":
-            return DisplayElement._upper_right_position(rendered_text)
+            return self._upper_right_position(rendered_text)
         elif position_type == "lower_right":
-            return DisplayElement._lower_right_position(rendered_text)
+            return self._lower_right_position(rendered_text)
     
-    @staticmethod
-    def parse_position(position, offset, rendered_text):
+    def parse_position(self, position, offset, rendered_text):
         """
         Parses a position string and calculates the position.
         Supports 'center' with optional offsets in the format: "center:(+x,+y)".
@@ -75,7 +80,7 @@ class DisplayElement(ABC):
             # Extract offsets
             delta_x, delta_y = offset
             # Calculate position with offsets
-            default_position_x, default_position_y = DisplayElement._default_position(position, rendered_text)
+            default_position_x, default_position_y = self._default_position(position, rendered_text)
             parsed_position = (default_position_x + delta_x, default_position_y + delta_y)
         else:
             raise ValueError(f"Invalid position format: {position}")
@@ -271,6 +276,7 @@ class Display:
 
 class DisplayText(DisplayElement):
     def __init__(self, text: str, font, color: tuple, position, offset: tuple):
+        super().__init__()
         self.text = text
         self.font = font
         self.color = color
@@ -279,7 +285,7 @@ class DisplayText(DisplayElement):
         
     def render(self, screen):
         rendered_text = self.font.render(self.text, True, self.color)
-        screen.blit(rendered_text, DisplayElement.parse_position(self.position, self.offset, rendered_text))
+        screen.blit(rendered_text, self.parse_position(self.position, self.offset, rendered_text))
 
 
 class DisplayTitleText(DisplayText):

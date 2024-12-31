@@ -1,8 +1,17 @@
+from pygame import display, init
 import math
 
+# Initialize pygame to fetch display information
+init()
+
 # SCREEN SETTINGS
-X_SCRNSIZE = 1200
-Y_SCRNSIZE = 800
+scrnsize_scale_factor = .8
+screen_info = display.Info()
+X_SCRNSIZE = int(screen_info.current_w * scrnsize_scale_factor) # Width of the display
+Y_SCRNSIZE = int(screen_info.current_h * scrnsize_scale_factor) # Height of the display
+MAX_X_SCRNSIZE = screen_info.current_w
+MAX_Y_SCRNSIZE = screen_info.current_h
+
 FPS = 50
 
 # buttons

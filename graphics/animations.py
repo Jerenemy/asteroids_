@@ -1,7 +1,7 @@
 import pygame as pg
 from abc import ABC, abstractmethod
 from math import cos, sin, pi
-from utils import Line, X_SCRNSIZE, Y_SCRNSIZE
+from utils import Line
 from random import random, uniform
 
 class Animation(ABC):
@@ -38,6 +38,66 @@ class ExplosionAnimation(Animation):
             alpha = max(0, 255 - int((self.elapsed / self.duration) * 255))
             color = (255, alpha, 0)  # Fading yellow
             pg.draw.circle(screen, color, (self.x, self.y), radius)
+
+from random import uniform, randint
+from math import cos, sin, radians
+import pygame as pg
+
+import pygame as pg
+from math import cos, sin, radians
+from random import uniform, randint
+from graphics.animations import Animation  # Import the base class
+
+class Particle:
+    """Represents a single particle in an explosion."""
+    def __init__(self, x, y, color, size, speed, direction, lifetime):
+        self.x = x
+        self.y = y
+        self.color = color
+        self.size = size
+        self.speed = speed
+        self.direction = direction
+        self.lifetime = lifetime
+        self.elapsed = 0  # Tracks particle's age
+    
+    def update(self):
+        """Move the particle and update its state."""
+        self.x += self.speed * cos(radians(self.direction))
+        self.y += self.speed * sin(radians(self.direction))
+        self.elapsed += 1
+        return self.elapsed < self.lifetime  # Particle is active if within lifetime
+    
+    def render(self, screen):
+        """Draw the particle on the screen."""
+        pg.draw.circle(screen, self.color, (int(self.x), int(self.y)), self.size)
+
+
+class ParticleExplosionAnimation(Animation):
+    """Explosion effect with particles, extending the Animation base class."""
+    def __init__(self, x, y, color, particle_count=30, max_lifetime=50): # change to take from entity so it can move in the same direction as the exploded sship or ast.
+        super().__init__(x, y, size=0, duration=max_lifetime)  # Size is irrelevant for this animation
+        self.particles = [
+            Particle(
+                x, y, color, 
+                size=randint(2, 5), 
+                speed=uniform(1, 5), 
+                direction=uniform(0, 360), 
+                lifetime=randint(max_lifetime//2, max_lifetime)
+            )
+            for _ in range(particle_count)
+        ]
+
+    def update(self):
+        """Update all particles."""
+        self.particles = [p for p in self.particles if p.update()]
+        self.elapsed += 1
+        self.finished = len(self.particles) == 0  # Animation finishes when all particles expire
+        return not self.finished
+    
+    def render(self, screen):
+        """Render all particles."""
+        for particle in self.particles:
+            particle.render(screen)
 
 class UserSpaceshipDeathAnimation(Animation):
     def __init__(self, spaceship, duration):
