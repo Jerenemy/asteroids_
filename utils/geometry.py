@@ -95,12 +95,15 @@ class RandomPolygon(Polygon):
 
 
 
-
 class UserSpaceshipPolygon(Polygon):
     def __init__(self, center_x, center_y, color, width, size, orientation):
         super().__init__(center_x, center_y, color, width)
         self.size = size
         self.orientation = orientation
+
+class UserSpaceshipPolygon(UserSpaceshipPolygon):
+    def __init__(self, center_x, center_y, color, width, size, orientation):
+        super().__init__(center_x, center_y, color, width, size, orientation)
         
     @property
     def vertices(self):
@@ -127,3 +130,22 @@ class UserSpaceshipPolygon(Polygon):
         
         return [(x_front, y_front), (x_endright, y_endright), (x_backright, y_backright), (x_backleft, y_backleft), (x_endleft, y_endleft)] 
         
+
+class RocketPolygon(UserSpaceshipPolygon):
+    def __init__(self, center_x, center_y, color, width, size, orientation):
+        super().__init__(center_x, center_y, color, width, size, orientation)
+    
+    @property
+    def vertices(self):
+        # tip
+        x_rocket = self.center_x + ((self.size * 1.4) * cos(pi / 180 * (180 + self.orientation - 90) ))
+        y_rocket = self.center_y + ((self.size * 1.4) * sin(pi / 180 * (180 + self.orientation - 90) ))
+        # 
+        x_rocketleft = self.center_x + ((self.size * .8) * cos(pi / 180 * (180 + 20 + self.orientation - 90) ))
+        y_rocketleft = self.center_y + ((self.size * .8) * sin(pi / 180 * (180 + 20 + self.orientation - 90) ))    
+        # 
+        x_rocketright = self.center_x + ((self.size * .8) * cos(pi / 180 * (180 - 20 + self.orientation - 90) ))
+        y_rocketright = self.center_y + ((self.size * .8) * sin(pi / 180 * (180 - 20 + self.orientation - 90) ))
+        return [(x_rocket, y_rocket), (x_rocketleft, y_rocketleft), (x_rocketright, y_rocketright)]
+
+    

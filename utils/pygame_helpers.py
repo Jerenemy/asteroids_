@@ -1,5 +1,6 @@
-from pygame import quit, key, mouse, QUIT, K_q
+from pygame import quit, key, mouse, QUIT, K_q, time
 from sys import exit
+
 
 def cleanup():
     exit()
@@ -42,8 +43,8 @@ class KeyManager:
             if not self.recently_allowed:
                 self.recently_allowed = True
                 return True
-            else: return False 
-        else:
+            else: return False # redundant else
+        else: # redundant else
             # detect key unpress when kp[self.key] == False
             self.recently_allowed = False
             return False

@@ -1,7 +1,7 @@
 import pygame as pg
 from math import cos, sin, pi, sqrt, asin, atan
 from entities import SpaceEntity
-from utils import WHITE, BLACK, ACCELERATION, DEG2RAD, RAD2DEG, ROTATE, X_SCRNSIZE, Y_SCRNSIZE, DECELERATION, Line, is_key_pressed, UserSpaceshipPolygon
+from utils import WHITE, BLACK, ACCELERATION, DEG2RAD, RAD2DEG, ROTATE, X_SCRNSIZE, Y_SCRNSIZE, DECELERATION, Line, is_key_pressed, UserSpaceshipPolygon,  flicker, RocketPolygon, FLICKER_DURATION
 
 
 class Spaceship(SpaceEntity):
@@ -9,10 +9,12 @@ class Spaceship(SpaceEntity):
         super().__init__(x, y, size, speed, direction, color)
         self.orientation = orientation
         self.polygon = UserSpaceshipPolygon(x, y, color, width, size, orientation)
+        self.rocket_polygon = RocketPolygon(x, y, color, width, size, orientation)
         self.invulnerable = False
         self.rocket_color = WHITE
         self.screen = screen
         self.is_destroying = False
+        self.flicker = flicker(FLICKER_DURATION)
 
     def should_despawn(self):
         return False
@@ -50,7 +52,7 @@ class Spaceship(SpaceEntity):
         self.y = self.y + (self.speed * sin(pi / 180 * (self.direction - 90) ))
         if not self.is_destroying:
             if is_key_pressed(pg.K_UP):
-                # self.render_rocket() 
+                # self.render_rocket(self.screen) 
                 self.accelerate()
             else:
                 self.decelerate()
@@ -69,44 +71,30 @@ class Spaceship(SpaceEntity):
         if self.y < 0: self.y = self.y + Y_SCRNSIZE
         if self.y > Y_SCRNSIZE: self.y = self.y - Y_SCRNSIZE
         # synchronize updated coords and orientation with sship's polygon
-        self.polygon.center_x = self.x
-        self.polygon.center_y = self.y
-        self.polygon.orientation = self.orientation
+        self.synchronize_polygons([self.polygon, self.rocket_polygon])
+    
+    def synchronize_polygons(self, polygons: list[UserSpaceshipPolygon]):
+        # TODO: potentially move this to utils and use for Asteroid too
+        for polygon in polygons:
+            print(f"type(polygon) = {type(polygon)}, ({round(polygon.center_x, 2)}, {round(polygon.center_y, 2)}, {polygon.orientation}")
+            polygon.center_x = self.x
+            polygon.center_y = self.y
+            polygon.orientation = self.orientation
+            
 
     #Method display in Class Spaceship
     def render(self, screen):
         if not self.is_destroying:
+            if is_key_pressed(pg.K_UP):
+                self.render_rocket(self.screen) 
             self.polygon.render(screen)
+            # self.render_rocket(screen)
         
-    # def render_rocket(self):
-    #     #ROCKETS
-    #     x_rocket = self.x + ((self.size * 1.4) * cos(pi / 180 * (180 + self.orientation - 90) ))
-    #     y_rocket = self.y + ((self.size * 1.4) * sin(pi / 180 * (180 + self.orientation - 90) ))
-        
-    #     x_rocketleft = self.x + ((self.size * .8) * cos(pi / 180 * (180 + 20 + self.orientation - 90) ))
-    #     y_rocketleft = self.y + ((self.size * .8) * sin(pi / 180 * (180 + 20 + self.orientation - 90) ))    
-        
-    #     x_rocketright = self.x + ((self.size * .8) * cos(pi / 180 * (180 - 20 + self.orientation - 90) ))
-    #     y_rocketright = self.y + ((self.size * .8) * sin(pi / 180 * (180 - 20 + self.orientation - 90) ))
-  
-    #     #rocket_width = 2
-    #     if not self.invulnerable:
-    #         if self.rocket_counter <= 2:
-    #             self.rocket_color = WHITE
-    #         if self.rocket_counter > 2:
-    #             self.rocket_color = BLACK
-            
-    #         self.rocket_counter += 1
-
-    #         if self.rocket_counter >= 4:
-    #             self.rocket_counter = 0
-
-
-    #     if self.display_rocket == 1:
-    #         pg.draw.polygon(self.screen, self.rocket_color, [(x_rocket, y_rocket), (x_rocketleft, y_rocketleft), (x_rocketright, y_rocketright)], self.width)
-    #         self.rocket = 0
-
-
+    def render_rocket(self, screen):
+        if not self.is_destroying: # TODO: also disallow while invulnerable
+            if self.flicker():
+                self.rocket_polygon.render(screen)
+            # need to have easier way to upgrade all of polygon's coords w/ spaceship. in sship.move, needs to automatically do this, here I just add it to a list of all features of the sship.
 
     def destroy(self):
 

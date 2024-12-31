@@ -57,7 +57,7 @@ class GameState:
         if self.state == "playing":
             self.object_manager.update_objects()
             # self.object_manager.add_asteroids(self.time_manager)
-            self.add_asteroids()
+            # self.add_asteroids()
             self.handle_collisions()  # Handle collisions and update state
             self.animation_manager.update_animations()  # Update animations
 

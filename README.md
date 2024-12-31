@@ -64,9 +64,8 @@ Resolve bug of spaceship destroy animation: I believe it is due to passing refer
 
 Also need to have Spaceship not display during the duration of the spaceship destruction sequence. Could do this by editing Spaceship.destroy(), but that seems like a bad solution, since then have to keep track of both timers simultaneously and they need to be synced. Possible, but is there a better solution?
 
-Done!!!
-
 ## Next
 1. Base rotation off of spaceship speed, have them not all always rotate same direction.
 2. Do spaceship rocket.
 3. All other stuff
+4. clean up display.py
