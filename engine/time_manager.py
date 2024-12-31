@@ -1,15 +1,17 @@
 import pygame as pg
 
 class TimeManager:
-    def __init__(self):
+    def __init__(self, delta_time):
+        self.delta_time = delta_time
         self.start_time = pg.time.get_ticks()
-        self.level = 1
-        self.delta_time = self.get_delta_time()
+        # self.current_level = 1
         self.next_time = self.delta_time
         self.prev_time = 0
+        # self.level_scale_factor = 0.8
         
-    def get_delta_time(self):
-        return 1000 / self.level
+    # @property
+    # def delta_time(self):
+    #     return 1000 * (self.level_scale_factor * self.current_level)
     
     @property
     def current_time(self):

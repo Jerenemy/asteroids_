@@ -3,7 +3,7 @@ from graphics import Display, AnimationManager, ParticleExplosionAnimation, User
 from .object_manager import ObjectManager
 from entities import UserSpaceship, Asteroid, Bullet
 from .high_scores_manager import HighScoresManager
-from .time_manager import TimeManager
+from .level_manager import LevelManager
 from utils import AssetManager, is_mouse_pressed, check_quit, choose_color, X_SCRNSIZE, Y_SCRNSIZE, WHITE, BULLET_SPEED, KeyManager, SSHIP_DESTRUCTION_DURATION, SPACEBAR, MAX_X_SCRNSIZE, MAX_Y_SCRNSIZE
 from graphics import DisplayElement
 
@@ -29,7 +29,7 @@ class GameState:
         self.animation_manager = AnimationManager()
         self.spacebar_manager = KeyManager(pg.K_SPACE)
         self.f_key_manager = KeyManager(pg.K_f)
-        self.time_manager = None # to be initialized upon game start  
+        self.level_manager = None # to be initialized upon game start  
         self.fullscreen = False
 
     
@@ -106,8 +106,8 @@ class GameState:
         self.animation_manager.update_animations()  # Update animations
         self.handle_collisions()  # Handle collisions and update state
         if self.state == "playing":
-            # self.object_manager.add_asteroids(self.time_manager)
             self.add_asteroids()
+            self.level_manager.update()
 
 
 
@@ -115,7 +115,7 @@ class GameState:
         """
         Add a new asteroid to the game if the appropriate time has elapsed.
         """
-        if not self.time_manager.check_delta_time_elapsed():
+        if not self.level_manager.asteroid_time_manager.check_delta_time_elapsed():
             return
         # x_scrnsize, y_scrnsize = pg.display.get_window_size()
         x, y, direction, size = Asteroid.generate_random_attributes(self.x_scrnsize, self.y_scrnsize)
@@ -166,7 +166,7 @@ class GameState:
             usship = self.object_manager.get_user_spaceship()
             # self.object_manager.render_objects(self.screen)
             # print(usship.delay_game_over_display)
-            self.display.render_game_over(usship.is_destroying, usship.delay_game_over_display,  self.points, self.lives, self.get_high_score('points'), self.get_high_score('level'))
+            self.display.render_game_over(usship.is_destroying, usship.delay_game_over_display,  self.points, self.level_manager.current_level, self.get_high_score('points'), self.get_high_score('level'))
                 
         pg.display.update()
 
@@ -188,7 +188,7 @@ class GameState:
         if not self.object_manager.objects['spaceships']:
             self.object_manager.add_object(UserSpaceship(self.x_scrnsize/2, self.y_scrnsize/2, 20, 0, 0, WHITE, self.screen))
         self.object_manager.get_user_spaceship().lost_all_lives = False
-        self.time_manager = TimeManager()
+        self.level_manager = LevelManager()
 
         # should have time_manager class?
         # self.object_manager.add_object(Asteroid(0, 0, 40, 2, 60, WHITE))

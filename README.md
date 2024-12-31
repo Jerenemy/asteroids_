@@ -74,9 +74,16 @@ Also need to have Spaceship not display during the duration of the spaceship des
 1. Make game over screen and play again
 
 # Bugs discovered:
-1. No time for destruction animation
-2. Spaceship added everytime restart, need to fix this either in start_game() only init-ing if necessary
-3. Displays are in wrong vertical position, need to be based off scrnsize
-4. Not displaying GAME OVER or CLICK TO PLAY
-5. High scores are not real
+1. No time for destruction animation - FIXED
+2. Spaceship added everytime restart, need to fix this either in start_game() only init-ing if necessary - FIXED
+3. Displays are in wrong vertical position, need to be based off scrnsize - FIXED
+4. Not displaying GAME OVER or CLICK TO PLAY - FIXED
+5. High scores are not real - FIXED
 
+# New Features to add:
+1. leveling system
+2. sounds
+3. automated spaceships
+4. improve particle movement
+5. improve asteroids shapes
+THEN DONE.
