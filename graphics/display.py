@@ -191,8 +191,9 @@ class Display:
     def set_title_elements(self, points_high_score, level_high_score, points=0, level=1):
         self.title_elements = [
             self.craft_element('ASTEROIDS', (150), 'center', (0, -40)),
-            self.craft_element('Jeremy Zay', (50), 'center', (0, (DisplayElement.y_scrnsize()/2)-translate_to_ratio(120)), font_name='signature', custom_font_path='signature.otf'),
-            self.craft_element('CLICK TO PLAY', (30), 'center', (0, 65))
+            self.craft_element('Lucas Wiedmann', (50), 'center', (0, (DisplayElement.y_scrnsize()/2)-translate_to_ratio(120)), font_name='signature', custom_font_path='signature.otf'),
+            self.craft_element('CLICK TO PLAY', (30), 'center', (0, 65)),
+            # self.craft_element('Named best game of all time by Obama', (40), 'lower_left', (50,-50), font_name='minecraft', custom_font_path='minecraft_font.ttf')
         ]
         self.title_elements += self.score_high_score_elements(points, level, points_high_score, level_high_score)
         
@@ -201,32 +202,6 @@ class Display:
         for element in self.title_elements:
             element.render(self.screen)
         
-    def add_lives_element(self, lives: int):
-        # if lives != self.last_displayed_lives:
-        lives_font = self.get_font('keyboard', 50)
-        lives_disp_el = DisplayText(
-            str(lives),
-            lives_font,
-            WHITE,
-            'upper_left',
-            (10, 10)
-        )
-        self.hud_elements.append(lives_disp_el)
-        # self.last_displayed_lives = lives
-    
-    def add_score_element(self, score: int):
-        # if score != self.last_displayed_score:
-        self.hud_elements = []
-        score_font = self.get_font('keyboard', 50)
-        score_disp_el = DisplayText(
-            str(score),
-            score_font,
-            WHITE,
-            'upper_right',
-            (-10, 10)
-        )
-        self.hud_elements.append(score_disp_el)
-    
     def init_hud_elements(self, score: int, lives: int):
         self.hud_elements = [
             self.craft_element(score, 45, 'upper_right', (-10, 10)),
@@ -255,6 +230,19 @@ class Display:
         self.elements = new_elements        
         # self.elements = [el for el in self.elements if not isinstance(el, class_type)]
 
+    def render_new_level(self, level: int, display_new_level: bool, color_counter: int):
+        self.new_level_element = []
+        if display_new_level:
+            color = (
+                255 - color_counter,
+                255 - color_counter,
+                255 - color_counter
+            )
+            self.new_level_element = [
+                self.craft_element(f'LEVEL {level}', 150, 'center', (0,0), color=color)
+            ]
+        for element in self.new_level_element:
+            element.render(self.screen)
         
 
 class DisplayText(DisplayElement):

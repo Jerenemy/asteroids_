@@ -1,4 +1,4 @@
-from pygame import quit, key, mouse, QUIT, K_q, time, display
+from pygame import quit, key, mouse, QUIT, K_q, K_z, time, display
 from sys import exit
 
 
@@ -49,4 +49,17 @@ class KeyManager:
             self.recently_allowed = False
             return False
 
-# current_window_size = display.get_window_size()
+class KeysManager:
+    def __init__(self):
+        self.key_obj_list = KeysManager.init_key_obj_list()
+     
+    @staticmethod   
+    def init_key_obj_list():
+        r = []
+        # instantiate object for each key in list (eg K_SPACE, K_a, K_b, ...)
+        for i in range(K_z):
+            r += [KeyManager(i)]
+        return r
+
+    def __call__(self, k: int):
+        return self.key_obj_list[k]

@@ -101,9 +101,9 @@ class UserSpaceshipPolygon(Polygon):
         self.size = size
         self.orientation = orientation
 
-class UserSpaceshipPolygon(UserSpaceshipPolygon):
-    def __init__(self, center_x, center_y, color, width, size, orientation):
-        super().__init__(center_x, center_y, color, width, size, orientation)
+# class UserSpaceshipPolygon(UserSpaceshipPolygon):
+#     def __init__(self, center_x, center_y, color, width, size, orientation):
+#         super().__init__(center_x, center_y, color, width, size, orientation)
         
     @property
     def vertices(self):

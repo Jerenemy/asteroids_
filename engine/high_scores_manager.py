@@ -28,7 +28,7 @@ class HighScoresManager:
             print("Error reading high scores file. Returning empty scores.")
             return {}
 
-    def save_high_scores(self):
+    def save_high_scores(self, points_high_score, level_high_score):
         """
         Save high scores to the JSON file.
         """
@@ -38,7 +38,7 @@ class HighScoresManager:
         except IOError as e:
             print(f"Error saving high scores: {e}")
 
-    def add_score(self, player_name, score):
+    def add_score(self, player_name, score, level):
         """
         Add or update a player's score.
 
@@ -54,7 +54,7 @@ class HighScoresManager:
             self.high_scores[player_name] = score
             print(f"Added new high score for {player_name}: {score}.")
 
-        self.save_high_scores()
+        self.save_high_scores(score, level)
 
     def get_top_scores(self, limit=10):
         """
