@@ -1,7 +1,4 @@
-from entities import SpaceEntity, Asteroid, Spaceship, UserSpaceship, Bullet
-from .time_manager import TimeManager
-# from utils import choose_color, WHITE, X_SCRNSIZE, Y_SCRNSIZE
-from random import randint
+from entities import Asteroid, Spaceship, UserSpaceship, Bullet
 from utils import get_list_item_by_type
 
 
@@ -79,11 +76,7 @@ class ObjectManager:
         """Handle logic for when objects collide."""
         if isinstance(obj1, Bullet) and isinstance(obj2, Asteroid):
             self.remove_object(obj1)
-            self.remove_object(obj2)
-            ast1, ast2 = obj2.split()
-            if ast1 and ast2:
-                self.add_object(ast1)
-                self.add_object(ast2)
+            self.split_asteroid(obj2)
             return {
                 'type': 'bullet_hit_asteroid',
                 'asteroid': obj2,
@@ -91,12 +84,20 @@ class ObjectManager:
         elif isinstance(obj1, Spaceship) and isinstance(obj2, Asteroid):
             # obj1.destroy()
             if not obj1.is_destroying:
-                self.remove_object(obj2)
+                self.split_asteroid(obj2)
                 if isinstance(obj1, UserSpaceship):
                     return {
                         'type': 'user_spaceship_hit', 
                         'spaceship': obj1, 
                         'asteroid': obj2
                     }
-            # elif isinstance(obj1, EnemySpaceship):
+            # elif isinstance(obj1, EnemySpaceship): # TODO: implement enemy spaceship
         return None  # No significant event
+
+    def split_asteroid(self, ast: Asteroid):
+        self.remove_object(ast)
+        ast1, ast2 = ast.split()
+        if ast1 and ast2:
+            self.add_object(ast1)
+            self.add_object(ast2)
+        

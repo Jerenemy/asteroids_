@@ -3,9 +3,8 @@ from math import cos, sin, pi, sqrt, asin, atan
 from entities import SpaceEntity
 from utils import WHITE, BLACK, ACCELERATION, DEG2RAD, RAD2DEG, ROTATE, X_SCRNSIZE, Y_SCRNSIZE, DECELERATION, is_key_pressed, UserSpaceshipPolygon, flicker, RocketPolygon, FLICKER_DURATION
 
-
 class Spaceship(SpaceEntity):
-    def __init__(self, x, y, size, speed, direction, color, screen, width=3, orientation=0):
+    def __init__(self, x, y, size, speed, direction, color, screen, sound_manager, width=3, orientation=0):
         super().__init__(x, y, size, speed, direction, color)
         self.orientation = orientation
         self.polygon = UserSpaceshipPolygon(x, y, color, width, size, orientation)
@@ -17,32 +16,46 @@ class Spaceship(SpaceEntity):
         self.delay_game_over_display = False
         self.lost_all_lives = True
         self.flicker = flicker(FLICKER_DURATION)
-        self.x_scrnsize = X_SCRNSIZE
-        self.y_scrnsize = Y_SCRNSIZE
+        self.sound_manager = sound_manager
 
+    @property
+    def x_scrnsize(self):
+        try:
+            return pg.display.get_window_size()[0]
+        except pg.error as e:
+            # print(e)
+            return X_SCRNSIZE
+        
+    @property
+    def y_scrnsize(self):
+        try:
+            return pg.display.get_window_size()[1]
+        except pg.error as e:
+            # print(e)
+            return Y_SCRNSIZE
+    
     def should_despawn(self):
         return False
     
     def accelerate(self):
-        # self.rocket = 1
-            a = ACCELERATION
-            c = self.speed
-            B = 180 - (self.orientation - self.direction)
-            new_speed = sqrt((a ** 2) + (c ** 2) - (2 * a * c * cos(B * DEG2RAD)))
-            #account for division by zero error
-            #maybe fixed by using law of sines with angle on bottom, maybe not though
-            if new_speed != 0:
-                new_direction_radians = asin((a * sin(B*DEG2RAD)) / new_speed)
-                new_direction = new_direction_radians * RAD2DEG + self.direction
-                # cycle direction when above 360
-                if new_direction >= 360:
-                    new_direction = new_direction - 360
-                elif new_direction <= 0:
-                    new_direction = new_direction + 360 
-                self.direction = new_direction
-            else: 
-                self.speed = 0
-            self.speed = new_speed
+        a = ACCELERATION
+        c = self.speed
+        B = 180 - (self.orientation - self.direction)
+        new_speed = sqrt((a ** 2) + (c ** 2) - (2 * a * c * cos(B * DEG2RAD)))
+        #account for division by zero error
+        #maybe fixed by using law of sines with angle on bottom, maybe not though
+        if new_speed != 0:
+            new_direction_radians = asin((a * sin(B*DEG2RAD)) / new_speed)
+            new_direction = new_direction_radians * RAD2DEG + self.direction
+            # cycle direction when above 360
+            if new_direction >= 360:
+                new_direction = new_direction - 360
+            elif new_direction <= 0:
+                new_direction = new_direction + 360 
+            self.direction = new_direction
+        else: 
+            self.speed = 0
+        self.speed = new_speed
             
     def decelerate(self):
         if self.speed > DECELERATION:  
@@ -56,8 +69,9 @@ class Spaceship(SpaceEntity):
         self.y = self.y + (self.speed * sin(pi / 180 * (self.direction - 90) ))
         if not self.is_destroying:
             if is_key_pressed(pg.K_UP):
-                # self.render_rocket(self.screen) 
+                # self.render_rocket(self.screen) # instead render rocket in self.render
                 self.accelerate()
+                self.sound_manager.play_event_sound('rocket') # play rocket sound here
             else:
                 self.decelerate()
             if is_key_pressed(pg.K_LEFT):
@@ -70,8 +84,6 @@ class Spaceship(SpaceEntity):
                     self.orientation = self.orientation - 360 + ROTATE
                 else:
                     self.orientation = self.orientation + ROTATE
-        self.update_scrnsize()
-        # x_scrnsize, y_scrnsize = pg.display.get_window_size()
         if self.x < 0: self.x = self.x + self.x_scrnsize
         if self.x > self.x_scrnsize: self.x = self.x - self.x_scrnsize
         if self.y < 0: self.y = self.y + self.y_scrnsize
@@ -87,19 +99,11 @@ class Spaceship(SpaceEntity):
             polygon.center_y = self.y
             polygon.orientation = self.orientation
             
-    def update_scrnsize(self):
-        try:
-            self.x_scrnsize, self.y_scrnsize = pg.display.get_window_size()
-        except Exception as e:
-            print(f"exception\n\n{e}")
-
-    #Method display in Class Spaceship
     def render(self, screen):
         if not self.is_destroying and not self.lost_all_lives:
             if is_key_pressed(pg.K_UP):
                 self.render_rocket(self.screen) 
             self.polygon.render(screen)
-            # self.render_rocket(screen)
         
     def render_rocket(self, screen):
         if not self.is_destroying: # TODO: also disallow while invulnerable
@@ -108,8 +112,6 @@ class Spaceship(SpaceEntity):
             # need to have easier way to upgrade all of polygon's coords w/ spaceship. in sship.move, needs to automatically do this, here I just add it to a list of all features of the sship.
 
     def destroy(self):
-        # self.update_scrnsize()
-        # x_scrnsize, y_scrnsize = pg.display.get_window_size()
         if not self.is_destroying:
             self.x = self.x_scrnsize/2
             self.polygon.center_x = self.x_scrnsize/2
@@ -153,8 +155,8 @@ class Spaceship(SpaceEntity):
             self.invulnerability_counter_color = 0
     
 class UserSpaceship(Spaceship):
-    def __init__(self, x, y, size, speed, direction, color, screen, width=3, orientation=0):
-        super().__init__(x, y, size, speed, direction, color, screen, width, orientation)
+    def __init__(self, x, y, size, speed, direction, color, screen, sound_manager, width=3, orientation=0):
+        super().__init__(x, y, size, speed, direction, color, screen, sound_manager, width=width, orientation=orientation)
 
 
 class SpaceshipLives(Spaceship):

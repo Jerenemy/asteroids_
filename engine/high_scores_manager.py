@@ -78,18 +78,3 @@ class HighScoresManager:
             # print(score, top_scores[0])
             return score > top_scores[0][1]
         return True
-            
-# Example usage
-if __name__ == "__main__":
-    manager = HighScoresManager()
-
-    # Add or update scores
-    manager.add_score("Alice", 1200)
-    manager.add_score("Bob", 900)
-    manager.add_score("Charlie", 1500)
-
-    # Retrieve and display top scores
-    top_scores = manager.get_top_scores()
-    print("Top Scores:")
-    for rank, (player, score) in enumerate(top_scores, start=1):
-        print(f"{rank}. {player}: {score}")

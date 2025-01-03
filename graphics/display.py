@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 import pygame as pg
 from utils import BLACK, WHITE, X_SCRNSIZE, Y_SCRNSIZE, translate_to_ratio
 import re
-from typing import Tuple
+from utils import UserSpaceshipPolygon, SPACESHIP_STARTING_LIVES
 
 
 class DisplayElement(ABC):
@@ -205,13 +205,19 @@ class Display:
     def init_hud_elements(self, score: int, lives: int):
         self.hud_elements = [
             self.craft_element(score, 45, 'upper_right', (-10, 10)),
-            self.craft_element(lives, 45, 'upper_left', (10, 10))
+            # self.craft_element(lives, 45, 'upper_left', (10, 10))
+            DisplaySpaceshipLives
         ]
+        
         
     def render_hud(self, score: int, lives: int):
         self.init_hud_elements(score, lives)
         for element in self.hud_elements:
             element.render(self.screen)
+        
+    def render_paused(self):
+        pause_element = self.craft_element('P A U S E D', 40, 'center', (0, -X_SCRNSIZE/2+20))
+        pause_element.render(self.screen)
         
     def clear_elements(self):
         """Remove all elements from the display."""
@@ -277,3 +283,47 @@ class DebugValue(DisplayElement):
         text = f"{self.label}: {self.value}"
         rendered_text = font.render(text, True, self.color)
         screen.blit(rendered_text, self.position)
+        
+class DisplaySpaceshipLives:
+    lives = 0
+    instances = []
+    screen = None
+    edge_offset = 40
+    
+    def __init__(self, lives=None, screen=None):
+        self.instances.append(self)
+        center_y = DisplaySpaceshipLives.edge_offset
+        self.life_polygon = UserSpaceshipPolygon(self.center_x, center_y, WHITE, 3, 20, 0)
+        if lives is not None: DisplaySpaceshipLives.lives = lives 
+        if screen is not None: DisplaySpaceshipLives.screen = screen
+
+    @property
+    def center_x(self):
+        return DisplaySpaceshipLives.edge_offset * (DisplaySpaceshipLives.instances.index(self) + 1) # account for zero index
+     
+    def render_instance(self, screen):
+        self.life_polygon.render(screen)
+        
+    @classmethod
+    def add_life(cls, screen):
+        _ = cls(lives=(cls.lives+1))
+        cls.screen = screen
+    
+    @classmethod
+    def remove_life(cls):
+        try:
+            cls.instances.pop()
+        except IndexError as e:
+            print(e)
+            pass
+    
+    @classmethod
+    def render(cls, screen):
+        print(len(cls.instances))
+        for instance in cls.instances:
+            instance.render_instance(screen)
+
+# class DisplaySpaceshipLivesList:
+#     @staticmethod
+#     def render():
+#         DisplaySpaceshipLives.

@@ -62,4 +62,4 @@ class KeysManager:
         return r
 
     def __call__(self, k: int):
-        return self.key_obj_list[k]
+        return self.key_obj_list[k].is_key_pressed_once()

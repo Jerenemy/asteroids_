@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from math import cos, sin, pi
 from utils import Line
 from random import random, uniform
+from utils import TimeManager, sign
 
 class Animation(ABC):
     def __init__(self, x, y, size, duration):
@@ -106,6 +107,11 @@ class UserSpaceshipDeathAnimation(Animation):
         self.orientation = spaceship.orientation
         self.polygon = spaceship.polygon
         self.lines = []  # Store all destructed lines
+        self.rotation_speed_factors = [
+                    (uniform(-1,1)),
+                    (uniform(-.9,1)),
+                    (uniform(-.8,1)),
+                    ] # TODO: have this be more of a factor: more randomness
 
     def _calculate_lines(self):
         vertices = self.polygon.vertices
@@ -139,6 +145,8 @@ class UserSpaceshipDeathAnimation(Animation):
         return new_lines
 
     def update(self):
+        if TimeManager.paused:
+            return
         self.elapsed += 1
         if self.elapsed == self.duration//2:
             print("here")
@@ -152,13 +160,16 @@ class UserSpaceshipDeathAnimation(Animation):
 
     def render(self, screen):
         for idx, line in enumerate(self.lines):
-            
-            if not hasattr(self, 'rotation_speed'):
-                self.rotation_speed = [
-                        (3*uniform(-1,1)*self.spaceship.speed), 
-                        (3*uniform(-1,1)*self.spaceship.speed), 
-                        (-3*uniform(-1,1)*self.spaceship.speed)
-                    ][idx]  # Different rotation speeds for variety
-            line.rotate(self.rotation_speed * self.elapsed)
+            rotation_speed = self.rotation_speed_factors[idx]
+            if not TimeManager.paused: # TODO: have them rotate different directions
+                line.rotate(
+                    1
+                    * self.elapsed
+                    * sign(rotation_speed)
+                    * ( 1 
+                       + abs(rotation_speed)
+                       + self.spaceship.speed
+                       )
+                    )
             line.draw(screen)
 
