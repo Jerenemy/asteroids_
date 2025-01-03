@@ -6,7 +6,7 @@ from .high_scores_manager import HighScoresManager
 from .level_manager import LevelManager
 from sounds import SoundManager
 WAIT_AFTER_ENTERING_INITIALS_TIME = 1000
-from utils import AssetManager, is_mouse_pressed, check_quit, choose_color, X_SCRNSIZE, Y_SCRNSIZE, WHITE, BULLET_SPEED, KeysManager, SSHIP_DESTRUCTION_DURATION, SPACEBAR, MAX_X_SCRNSIZE, MAX_Y_SCRNSIZE, TimeManager, is_key_pressed, WAIT_AFTER_ENTERING_INITIALS_TIME
+from utils import AssetManager, is_mouse_pressed, check_quit, choose_color, X_SCRNSIZE, Y_SCRNSIZE, WHITE, BULLET_SPEED, KeysManager, SSHIP_DESTRUCTION_DURATION, SPACEBAR, MAX_X_SCRNSIZE, MAX_Y_SCRNSIZE, TimeManager, is_key_pressed, WAIT_AFTER_ENTERING_INITIALS_TIME, INVULNERABLE_TIME
 
 # INITIALIZE OBJECTS
 high_scores_manager = HighScoresManager()
@@ -32,13 +32,13 @@ class GameState:
         self.lives = lives
         self.max_lives = lives
         self.points = points
-        self.state = "title_menu"  # Possible states: 'menu', 'playing', 'paused', 'game_over'
+        self.state = "title_menu"  # Possible states: 'title_menu', 'playing', 'paused', 'game_over', 'new_high_score', 'game_over_menu'
         self.level_manager = None # to be initialized upon game start  
         self.fullscreen = False
         self.name = None
         self.initials = []
         self.last_high_score_initials = None
-        self.delay_trans_tm = None
+        self.delay_trans_tm = None # will be init'ed to be a TimeManager that delays the transition away from the new_high_score state so you can see the initials you entered for a sec
 
 
     @property
@@ -265,23 +265,6 @@ class GameState:
             z_index=4,
             states=["new_high_score"]
         )
-        
-        # # Add a game over layer (only in 'game_over' state)
-        # render_manager.add_layer(
-        #     lambda screen: display.render_game_over(
-        #         self.new_high_score,
-        #         usship.is_destroying,
-        #         usship.delay_game_over_display,
-        #         self.points,
-        #         self.current_level,
-        #         self.get_high_score('points'), 
-        #         self.get_high_score('level'),
-        #         new_high_score_initials=self.get_initials()),
-        #     z_index=4,
-        #     states=["game_over"]
-        # )
-        
-    
     
     def is_high_score(self):
         b = high_scores_manager.is_high_score(self.points, 'points') or high_scores_manager.is_high_score(self.current_level, 'level')
@@ -311,8 +294,11 @@ class GameState:
             ))
         for _ in range(self.max_lives-1):
             DisplaySpaceshipLives.add_life(screen)
-        object_manager.get_user_spaceship().lost_all_lives = False
+        sship = object_manager.get_user_spaceship()
+        sship.lost_all_lives = False
+        sship.invulnerable = True
         self.level_manager = LevelManager(asset_manager)
+        sship.invulnerable_time_manager = TimeManager(INVULNERABLE_TIME) # add it back cause instantiating the level_manager wipes all the instances from TimeManager
 
     def pause_game(self):
         """

@@ -167,7 +167,7 @@ class Display:
             # no new high score
         text_elements = [
             self.craft_element('NEW HIGH SCORE', 80, 'center', (0, -Y_SCRNSIZE/2 + 200)),
-            self.craft_element('E N T E R  I N I T I A L S', 20, 'center', (0, -Y_SCRNSIZE/2 + 350))
+            self.craft_element('E N T E R    I N I T I A L S', 20, 'center', (0, -Y_SCRNSIZE/2 + 350))
         ]
         hud_elements = [
             self.craft_element(points, element_size, 'upper_right', (-10, 10)),

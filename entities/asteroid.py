@@ -12,8 +12,8 @@ class Asteroid(SpaceEntity):
         self.width = width
         self.sides = 8
         self.polygon = RandomPolygon(x, y, size, self.sides, color, 3, self._radii)
-        self.points = 10 if size > 30 else 100
         self.min_size = 30
+        self.points = 10 if size > self.min_size*2 else 100
         
     def should_despawn(self):
         return self.is_out_of_bounds
@@ -70,7 +70,7 @@ class Asteroid(SpaceEntity):
         return x, y, direction, size
     
     def split(self):
-        if self.size >= self.min_size*2:
+        if self.size > self.min_size*2:
             ast1 = Asteroid(self.x, self.y, self.size//2, self.direction+45, self.color)
             ast2 = Asteroid(self.x, self.y, self.size//2, self.direction-45, self.color)
             return (ast1, ast2)

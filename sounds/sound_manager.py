@@ -18,7 +18,7 @@ class SoundManager:
             if self.rocket_sound_time_manager.check_delta_time_elapsed():
                 self.get_sound('rocket', 'thrust1.wav').play()
         elif event_type == 'bullet_hit_asteroid':
-            self.get_sound('asteroid_explosion', 'bangLarge.wav')
+            self.get_sound('asteroid_explosion', 'bangLarge.wav').play()
         elif event_type == 'user_spaceship_hit':
             self.get_sound('explosion', 'bangMedium.wav').play()
         elif event_type == 'automated_spaceship_hit':

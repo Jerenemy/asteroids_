@@ -5,7 +5,7 @@ from utils import FPS, cleanup
 def main():
     init()
     clock = time.Clock()
-    game_state = GameState(lives=1)
+    game_state = GameState(lives=2)
     while game_state.state != "exit":
         game_state.handle_events()
         game_state.update_game()

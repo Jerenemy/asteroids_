@@ -83,7 +83,7 @@ class ObjectManager:
             }
         elif isinstance(obj1, Spaceship) and isinstance(obj2, Asteroid):
             # obj1.destroy()
-            if not obj1.is_destroying or obj1.lost_all_lives:
+            if not obj1.is_destroying and not obj1.lost_all_lives and not obj1.invulnerable:
                 self.split_asteroid(obj2)
                 if isinstance(obj1, UserSpaceship):
                     return {

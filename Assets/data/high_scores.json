@@ -1,8 +1,13 @@
 {
     "points": {
-        "JTZ": 0
+        "JTZ": 0,
+        "PVV": 10,
+        "QQQ": 60
     },
     "level": {
-        "JTZ": 0
+        "JTZ": 0,
+        "LLL": 2,
+        "LSC": 3,
+        "AAA": 4
     }
 }

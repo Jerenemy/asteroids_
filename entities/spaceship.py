@@ -1,7 +1,7 @@
 import pygame as pg
 from math import cos, sin, pi, sqrt, asin, atan
 from entities import SpaceEntity
-from utils import WHITE, BLACK, ACCELERATION, DEG2RAD, RAD2DEG, ROTATE, X_SCRNSIZE, Y_SCRNSIZE, DECELERATION, is_key_pressed, UserSpaceshipPolygon, flicker, RocketPolygon, FLICKER_DURATION
+from utils import WHITE, BLACK, ACCELERATION, DEG2RAD, RAD2DEG, ROTATE, X_SCRNSIZE, Y_SCRNSIZE, DECELERATION, is_key_pressed, UserSpaceshipPolygon, flicker, RocketPolygon, FLICKER_ROCKET_DURATION, FLICKER_INVULNERABLE_DURATION, INVULNERABLE_TIME, TimeManager
 
 class Spaceship(SpaceEntity):
     def __init__(self, x, y, size, speed, direction, color, screen, sound_manager, width=3, orientation=0):
@@ -9,14 +9,16 @@ class Spaceship(SpaceEntity):
         self.orientation = orientation
         self.polygon = UserSpaceshipPolygon(x, y, color, width, size, orientation)
         self.rocket_polygon = RocketPolygon(x, y, color, width, size, orientation)
-        self.invulnerable = False
+        self.invulnerable = True
         self.rocket_color = WHITE
         self.screen = screen
         self.is_destroying = False
         self.delay_game_over_display = False
         self.lost_all_lives = True
-        self.flicker = flicker(FLICKER_DURATION)
+        self.flicker_rocket = flicker(FLICKER_ROCKET_DURATION)
+        self.flicker_invulnerable = flicker(FLICKER_INVULNERABLE_DURATION)
         self.sound_manager = sound_manager
+        self.invulnerable_time_manager = TimeManager(INVULNERABLE_TIME)
 
     @property
     def x_scrnsize(self):
@@ -101,11 +103,16 @@ class Spaceship(SpaceEntity):
         if not self.is_destroying and not self.lost_all_lives:
             if is_key_pressed(pg.K_UP):
                 self.render_rocket(self.screen) 
-            self.polygon.render(screen)
+            if not TimeManager.paused and self.invulnerable:
+                if not self.flicker_invulnerable():
+                    self.polygon.render(screen)
+            else:
+                self.polygon.render(screen)
+            self.check_invulnerable_status()
         
     def render_rocket(self, screen):
-        if not self.is_destroying: # TODO: also disallow while invulnerable
-            if self.flicker():
+        if not self.is_destroying and not self.invulnerable: # TODO: also disallow while invulnerable
+            if self.flicker_rocket():
                 self.rocket_polygon.render(screen)
             # need to have easier way to upgrade all of polygon's coords w/ spaceship. in sship.move, needs to automatically do this, here I just add it to a list of all features of the sship.
 
@@ -118,39 +125,15 @@ class Spaceship(SpaceEntity):
             self.speed = 0
             self.orientation = 0
             self.polygon.orientation = 0
-        
-    def make_invulnerable(self):
-        # if self.invulnerability == 1 and self.paused_true == 0:
+            self.invulnerable = True
+            TimeManager.instances.remove(self.invulnerable_time_manager) # remove to avoid overhead by adding too many TimeManager instances
+            self.invulnerable_time_manager = TimeManager(INVULNERABLE_TIME)     
+            
+    def check_invulnerable_status(self):
         if self.invulnerable:
-            self.invulnerability_counter += 1
-            if self.invulnerability_counter_color < self.invulnerability_counter_color_delta:
-                self.color = WHITE
-                #rocket color fix: black when sship is black
-                if self.rocket_counter <= 2:
-                    self.rocket_color = WHITE
-                if self.rocket_counter > 2:
-                    self.rocket_color = BLACK
-                
-                self.rocket_counter += 1
-
-                if self.rocket_counter >= 4:
-                    self.rocket_counter = 0
-            
-            if self.invulnerability_counter_color >= self.invulnerability_counter_color_delta:
-                self.color = BLACK
-                self.rocket_color = BLACK
-            
-            self.invulnerability_counter_color += 1
-
-            if self.invulnerability_counter_color >= self.invulnerability_counter_color_delta * 1.5:
-                self.invulnerability_counter_color = 0
-            if self.invulnerability_counter > self.invulnerability_counter_end - 1:
-                self.color = WHITE
-
-        if self.invulnerability_counter >= self.invulnerability_counter_end:
-            self.invulnerability = 0
-            self.invulnerability_counter = 0
-            self.invulnerability_counter_color = 0
+            if self.invulnerable_time_manager.check_delta_time_elapsed():
+                self.invulnerable = False
+       
     
 class UserSpaceship(Spaceship):
     def __init__(self, x, y, size, speed, direction, color, screen, sound_manager, width=3, orientation=0):
