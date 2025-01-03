@@ -10,7 +10,7 @@ class HighScoresManager:
         try: 
             _, high_score = self.get_top_scores(score_type)[0]
             # print(high_score)
-            return score >= high_score
+            return score > high_score
         except KeyError as e:
             return False
     
@@ -38,6 +38,7 @@ class HighScoresManager:
     
     def save_new_high_score(self, name: str, score: int, score_type: str):
         self.high_scores[score_type][name] = score
+        print('saved high scores', name)
         self._save_high_scores_to_file()
     
     def _save_high_scores_to_file(self):
@@ -53,6 +54,8 @@ class HighScoresManager:
         return (name_points, points_high_score), (name_level, level_high_score)
     
     def get_top_score(self, score_type: str):
+        # print("here")
+        # print(self.high_scores)
         return self.get_top_scores(score_type)[0]
         # print(type(self.high_scores))
         # print(self.high_scores)

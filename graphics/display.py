@@ -148,9 +148,52 @@ class Display:
         self.asset_manager.load_font(font_name, custom_font_path, size)
         return self.asset_manager.get_font(font_name, size)
        
-    def render_game_over(self, is_destroying: bool, delay: bool, score: int, lives: int, points_high_score: int, level_high_score: int):
-        game_over_elements_list = self.game_over_elements(is_destroying, delay, score, lives, points_high_score, level_high_score)
-        for element in game_over_elements_list:
+    def create_game_over_menu_elements(self, points, level, points_high_score_tup, level_high_score_tup) -> list: 
+        # start w empty lists (move others up here too)
+        # initial game over display
+        element_size = 50
+        game_over_text = [
+            self.craft_element('GAME OVER', 100, 'center', (0, -10))
+        ]
+        game_over_hud = self.score_high_score_elements(points, level, points_high_score_tup, level_high_score_tup)
+        game_over_text.append(self.craft_element('CLICK TO PLAY', 30, 'center', (0, 65)))
+        return game_over_text + game_over_hud
+    
+    def create_new_high_score_elements(self, points, level, initials):
+        element_size = 50
+        initials_elements = []
+        for i in range(len(initials)):
+            initials_elements += [self.craft_element(initials[i], 50, 'center', (-50 + 50*i, 200))]
+            # no new high score
+        text_elements = [
+            self.craft_element('NEW HIGH SCORE', 80, 'center', (0, -Y_SCRNSIZE/2 + 200)),
+            self.craft_element('E N T E R  I N I T I A L S', 20, 'center', (0, -Y_SCRNSIZE/2 + 350))
+        ]
+        hud_elements = [
+            self.craft_element(points, element_size, 'upper_right', (-10, 10)),
+            self.craft_element(level, element_size, 'upper_left', (10, 10))
+        ] # changet to put this on a new layer too
+        return initials_elements + text_elements + hud_elements      
+    
+    def create_game_over_elements(self, delay, points):
+        element_size = 50
+        game_over_hud = [self.craft_element(points, element_size, 'upper_right', (-10, 10))]
+        game_over_text = [self.craft_element('GAME OVER', 100, 'center', (0, -10))] if not delay else []
+        return game_over_hud + game_over_text
+
+    def render_game_over(self, delay: bool, points: int):
+        game_over_elements = self.create_game_over_elements(delay, points)
+        for element in game_over_elements: # make function to do this
+            element.render(self.screen)
+    
+    def render_game_over_menu(self, points, level, points_high_score, level_high_score):
+        game_over_menu_elements = self.create_game_over_menu_elements(points, level, points_high_score, level_high_score)
+        for element in game_over_menu_elements:
+            element.render(self.screen)
+            
+    def render_new_high_score(self, points: int, level: int, initials: list):
+        new_high_score_elements = self.create_new_high_score_elements(points, level, initials)
+        for element in new_high_score_elements:
             element.render(self.screen)
     
     def score_high_score_elements(self, points: int, level: int, points_high_score_tup: tuple, level_high_score_tup: tuple) -> list:
@@ -175,26 +218,11 @@ class Display:
             self.craft_element("POINTS", high_score_text_size, "center", (50, points_level_text_height)),
             self.craft_element(level_high_score, high_score_size, 'center', (-45, high_score_height)),
             self.craft_element(points_high_score, high_score_size, 'center', (45, high_score_height)),
-            self.craft_element(points_name, initials_text_size, 'center', ((-45, initials_text_height))),
-            self.craft_element(level_name, initials_text_size, 'center', ((45, initials_text_height)))
+            self.craft_element(level_name, initials_text_size, 'center', ((-45, initials_text_height))),
+            self.craft_element(points_name, initials_text_size, 'center', ((45, initials_text_height)))
         ]
         return game_over_hud + stats 
 
-    def game_over_elements(self, is_destroying: bool, delay: bool, points: int, level: int, points_high_score_tup: tuple, level_high_score_tup: tuple) -> list: 
-        if not delay:
-            element_size = 50
-            game_over_text = [
-                self.craft_element('GAME OVER', 100, 'center', (0, -10))
-            ]
-            game_over_hud = [self.craft_element(points, element_size, 'upper_right', (-10, 10))]
-            if not is_destroying:
-                game_over_hud = self.score_high_score_elements(points, level, points_high_score_tup, level_high_score_tup)
-                game_over_text.append(self.craft_element('CLICK TO PLAY', 30, 'center', (0, 65)))
-        else:
-            game_over_text = []
-            game_over_hud = []
-        return game_over_text + game_over_hud
-            
     def set_title_elements(self, points_high_score_tup: tuple, level_high_score_tup: tuple, points=0, level=1):
         self.title_elements = [
             self.craft_element('ASTEROIDS', (150), 'center', (0, -40)),

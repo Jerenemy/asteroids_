@@ -87,3 +87,11 @@ Also need to have Spaceship not display during the duration of the spaceship des
 4. improve particle movement
 5. improve asteroids shapes
 THEN DONE.
+
+## Difficulties encountered:
+Inputting initials is much harder than i originally anticipated. will need to likely have another state for that, can't force it into the game_over state.
+
+Add 3 new states: 'game_over', 'new_high_score', 'game_over_menu', (change name of 'menu' to 'title_menu')
+- 'game_over': immediately after the spaceship dies, display only the GAME OVER text in middle of screen
+- 'game_over_menu': after timer runs out, transition from 'game_over' to 'game_over_menu', display the hud and high scores (assuming no new high score)
+- new_high_score: after game_over timer runs out, if new high score is true, display the text giving the player directions, their high score and type, and each of their initials input so far. transition out of this state when the length of the initials list is equal to 3. and then wipe the initials list after transitioning out of the state into the 'game_over_menu' state, first storing the new high score. ONLY NOW is the high score calculated. 

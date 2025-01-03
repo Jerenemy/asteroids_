@@ -5,7 +5,8 @@ from entities import UserSpaceship, Asteroid, Bullet
 from .high_scores_manager import HighScoresManager
 from .level_manager import LevelManager
 from sounds import SoundManager
-from utils import AssetManager, is_mouse_pressed, check_quit, choose_color, X_SCRNSIZE, Y_SCRNSIZE, WHITE, BULLET_SPEED, KeysManager, SSHIP_DESTRUCTION_DURATION, SPACEBAR, MAX_X_SCRNSIZE, MAX_Y_SCRNSIZE, TimeManager
+WAIT_AFTER_ENTERING_INITIALS_TIME = 1000
+from utils import AssetManager, is_mouse_pressed, check_quit, choose_color, X_SCRNSIZE, Y_SCRNSIZE, WHITE, BULLET_SPEED, KeysManager, SSHIP_DESTRUCTION_DURATION, SPACEBAR, MAX_X_SCRNSIZE, MAX_Y_SCRNSIZE, TimeManager, is_key_pressed, WAIT_AFTER_ENTERING_INITIALS_TIME
 
 # INITIALIZE OBJECTS
 high_scores_manager = HighScoresManager()
@@ -31,10 +32,13 @@ class GameState:
         self.lives = lives
         self.max_lives = lives
         self.points = points
-        self.state = "menu"  # Possible states: 'menu', 'playing', 'paused', 'game_over'
+        self.state = "title_menu"  # Possible states: 'menu', 'playing', 'paused', 'game_over'
         self.level_manager = None # to be initialized upon game start  
         self.fullscreen = False
         self.name = None
+        self.initials = []
+        self.last_high_score_initials = None
+        self.delay_trans_tm = None
 
 
     @property
@@ -42,22 +46,18 @@ class GameState:
         return self.level_manager.current_level
     
     def get_high_score(self, score_type: str) -> tuple:
-        if self.state != "game_over":
+        if self.state != "game_over_menu":
             return high_scores_manager.get_top_score(score_type)
         if score_type == 'points': # TODO: implement level high scores
             if high_scores_manager.is_high_score(self.points, score_type):
-                if self.name is None:
-                    self.name = self.get_initials()
-                high_scores_manager.save_new_high_score(self.name, self.points, score_type)
+                # TODO: FIX THIS. this is not going to work since get_initials cant be completed in one call. maybe need to change the state. (but still want to render the game over at the end)
+                print(self.last_high_score_initials, 'here')
+                high_scores_manager.save_new_high_score(self.last_high_score_initials, self.points, score_type)
         elif score_type == 'level':
             if high_scores_manager.is_high_score(self.current_level, score_type):
-                if self.name is None:
-                    self.name = self.get_initials()
-                high_scores_manager.save_new_high_score(self.name, self.current_level, score_type)
+                high_scores_manager.save_new_high_score(self.last_high_score_initials, self.current_level, score_type)
         return high_scores_manager.get_top_score(score_type)
        
-    def get_initials(self):
-        return "JZ"
     
     @property
     def x_scrnsize(self):
@@ -90,23 +90,45 @@ class GameState:
             if check_quit(event):
                 self.state = "exit"
                 return
-        if keys_manager(pg.K_f):
-            self.toggle_fullscreen()
-        if self.state == "menu" and is_mouse_pressed(SPACEBAR):
+        if self.state != "new_high_score":
+            if keys_manager.is_key_pressed(pg.K_f):
+                self.toggle_fullscreen()
+            if is_key_pressed(pg.K_q):
+                self.state = "exit"
+                return
+        if self.state == "title_menu" and is_mouse_pressed(SPACEBAR):
             self.start_game()
         elif self.state == "playing":
             self.handle_bullet_firing()
-            if keys_manager(pg.K_p):
+            if keys_manager.is_key_pressed(pg.K_p):
                 self.pause_game()
-        elif self.state == "game_over" and is_mouse_pressed(SPACEBAR):
-            self.reset_game()  
+        elif self.state == "game_over":
+            sship = object_manager.get_user_spaceship()
+            if not sship.is_destroying:
+                if self.is_high_score():  
+                    self.state = "new_high_score"
+                else: self.state = "game_over_menu"
+        elif self.state == "game_over_menu" and is_mouse_pressed(SPACEBAR):
+            self.reset_game()
+        elif self.state == "new_high_score":
+            initial = keys_manager.get_key_pressed_once()
+            if initial is not None and len(self.initials) < 3:
+                self.initials += [initial.upper()]
+            if self.delay_trans_tm is None and len(self.initials) == 3:
+                self.delay_trans_tm = TimeManager(WAIT_AFTER_ENTERING_INITIALS_TIME)
+            if self.delay_trans_tm is not None and self.delay_trans_tm.check_delta_time_elapsed():
+                print(self.initials)
+                self.last_high_score_initials = ''.join(self.initials) # if i wipe the initials now, is that fine? i need to pass the initials into the init_layers_to_render
+                self.delay_trans_tm = None
+                self.state = "game_over_menu"
         elif self.state == "paused":
-            if keys_manager(pg.K_p):
+            if keys_manager.is_key_pressed(pg.K_p):
                 self.resume_game()
+            
 
     # NOTE: should add_asteroids be a method in object_manager, if it depends on the level from the game_state?
     def handle_bullet_firing(self):
-        if keys_manager(pg.K_SPACE):
+        if keys_manager.is_key_pressed(pg.K_SPACE):
             # need access to spaceship attributes to initialize bullet
             x, y, direction = Bullet.get_bullet_launch_attributes(object_manager.get_user_spaceship())
             bullet = Bullet(x, y, 3, BULLET_SPEED, direction, WHITE)
@@ -207,7 +229,7 @@ class GameState:
                 self.get_high_score('points'), 
                 self.get_high_score('level')),
             z_index=4,
-            states=["menu"]
+            states=["title_menu"]
         )
         # Add a paused layer (only in 'paused' state)
         render_manager.add_layer(
@@ -215,21 +237,57 @@ class GameState:
             z_index=4,
             states=["paused"]
         )
-        # Add a game over layer (only in 'game_over' state)
-        usship = object_manager.get_user_spaceship()
+        sship = object_manager.get_user_spaceship()
         render_manager.add_layer(
             lambda screen: display.render_game_over(
-                usship.is_destroying,
-                usship.delay_game_over_display,
+                sship.delay_game_over_display,
+                self.points
+                ),
+            z_index=4,
+            states=["game_over"]
+        ) # where to handle exiting this phase if timer runs out?
+        render_manager.add_layer(
+            lambda screen: display.render_game_over_menu(
                 self.points,
                 self.current_level,
                 self.get_high_score('points'), 
-                self.get_high_score('level')),
+                self.get_high_score('level'),
+            ), 
             z_index=4,
-            states=["game_over"]
+            states=["game_over_menu"]
+        )
+        render_manager.add_layer(
+            lambda screen: display.render_new_high_score(
+                self.points,
+                self.current_level,
+                self.initials
+            ),
+            z_index=4,
+            states=["new_high_score"]
         )
         
+        # # Add a game over layer (only in 'game_over' state)
+        # render_manager.add_layer(
+        #     lambda screen: display.render_game_over(
+        #         self.new_high_score,
+        #         usship.is_destroying,
+        #         usship.delay_game_over_display,
+        #         self.points,
+        #         self.current_level,
+        #         self.get_high_score('points'), 
+        #         self.get_high_score('level'),
+        #         new_high_score_initials=self.get_initials()),
+        #     z_index=4,
+        #     states=["game_over"]
+        # )
         
+    
+    
+    def is_high_score(self):
+        b = high_scores_manager.is_high_score(self.points, 'points') or high_scores_manager.is_high_score(self.current_level, 'level')
+        print(b, 'ahhhhhh')
+        return b
+    
 
     def start_game(self):
         """
@@ -308,6 +366,7 @@ class GameState:
         """
         Reset the game state to prepare for a new game.
         """
+        self.initials = []
         if not object_manager.get_user_spaceship().is_destroying:
             self.start_game()
 

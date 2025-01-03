@@ -1,4 +1,4 @@
-from pygame import quit, key, mouse, QUIT, K_q, K_z, time, display
+from pygame import quit, key, mouse, QUIT, K_a, K_z, K_q, K_z, time, display
 from sys import exit
 
 
@@ -26,7 +26,7 @@ def is_mouse_pressed(mouse_input: int):
     return mp[mouse_input]
 
 def check_quit(event):
-    if event.type == QUIT or is_key_pressed(K_q):
+    if event.type == QUIT:
         return True
 
 
@@ -52,14 +52,30 @@ class KeyManager:
 class KeysManager:
     def __init__(self):
         self.key_obj_list = KeysManager.init_key_obj_list()
+        self.alpha_key_mappings = KeysManager.init_alpha_key_mappings()
      
     @staticmethod   
     def init_key_obj_list():
         r = []
         # instantiate object for each key in list (eg K_SPACE, K_a, K_b, ...)
-        for i in range(K_z):
+        for i in range(K_z+1):
             r += [KeyManager(i)]
         return r
 
-    def __call__(self, k: int):
+    @staticmethod
+    def init_alpha_key_mappings():
+        # Generate mapping for alphabetic keys
+        return [chr(K_a + i) for i in range(K_z - K_a + 1)]
+
+    def is_key_pressed(self, k: int):
+        # print(k, "\n\n\n")
         return self.key_obj_list[k].is_key_pressed_once()
+    
+    def get_key_pressed_once(self):
+        # iterate through list (only through the letters, if key pressed, return that key (as a string))
+        for i in range(K_a, K_z+1):
+            if self.is_key_pressed(i):
+                return self.alpha_key_mappings[i - K_a]
+
+    # def __call__(self, k: int):
+    #     return self.key_obj_list[k].is_key_pressed_once()
