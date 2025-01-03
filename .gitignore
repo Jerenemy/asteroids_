@@ -12,8 +12,8 @@
 !assets/fonts/*
 !assets/sounds
 !assets/sounds/*
-# data
-!data
+!assets/data
+!assets/data/*
 # engine
 !engine
 !engine/*.py
@@ -23,6 +23,9 @@
 # graphics
 !graphics
 !graphics/*.py
+# sounds
+!sounds
+!sounds/*
 # utils
 !utils
 !utils/*.py

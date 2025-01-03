@@ -1,5 +1,6 @@
 from pygame import display, init
 import math
+from os import path
 
 # Initialize pygame to fetch display information
 init()
@@ -38,7 +39,7 @@ RAD2DEG = 180 / math.pi
 DEG2RAD = math.pi / 180
 
 # PATHS
-HIGH_SCORES_FILE = "data/high_scores.json"
+HIGH_SCORES_FILE = path.join("assets", "data", "high_scores.json")
 
 # STATES
 MENU = 'menu'

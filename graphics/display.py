@@ -153,7 +153,10 @@ class Display:
         for element in game_over_elements_list:
             element.render(self.screen)
     
-    def score_high_score_elements(self, points: int, level: int, points_high_score: int, level_high_score: int) -> list:
+    def score_high_score_elements(self, points: int, level: int, points_high_score_tup: tuple, level_high_score_tup: tuple) -> list:
+        # print(points_high_score_tup, 'brea', level_high_score_tup)
+        points_name, points_high_score = points_high_score_tup
+        level_name, level_high_score = level_high_score_tup
         element_size = 50
         game_over_hud = [
             self.craft_element(points, element_size, 'upper_right', (-10, 10)),
@@ -164,16 +167,20 @@ class Display:
         points_level_text_height = high_score_text_height + translate_to_ratio(high_score_text_size+7)
         high_score_size = 30
         high_score_height = points_level_text_height + translate_to_ratio(high_score_size)
+        initials_text_size = translate_to_ratio(high_score_size/2)
+        initials_text_height = high_score_height + initials_text_size + translate_to_ratio(8)
         stats = [
             self.craft_element("HIGH SCORE", 20, "center", (0, high_score_text_height)),
             self.craft_element("LEVEL", high_score_text_size, "center", (-50, points_level_text_height)),
             self.craft_element("POINTS", high_score_text_size, "center", (50, points_level_text_height)),
             self.craft_element(level_high_score, high_score_size, 'center', (-45, high_score_height)),
-            self.craft_element(points_high_score, high_score_size, 'center', (45, high_score_height))
+            self.craft_element(points_high_score, high_score_size, 'center', (45, high_score_height)),
+            self.craft_element(points_name, initials_text_size, 'center', ((-45, initials_text_height))),
+            self.craft_element(level_name, initials_text_size, 'center', ((45, initials_text_height)))
         ]
         return game_over_hud + stats 
 
-    def game_over_elements(self, is_destroying: bool, delay: bool, points: int, level: int, points_high_score: int, level_high_score: int) -> list: 
+    def game_over_elements(self, is_destroying: bool, delay: bool, points: int, level: int, points_high_score_tup: tuple, level_high_score_tup: tuple) -> list: 
         if not delay:
             element_size = 50
             game_over_text = [
@@ -181,24 +188,24 @@ class Display:
             ]
             game_over_hud = [self.craft_element(points, element_size, 'upper_right', (-10, 10))]
             if not is_destroying:
-                game_over_hud = self.score_high_score_elements(points, level, points_high_score, level_high_score)
+                game_over_hud = self.score_high_score_elements(points, level, points_high_score_tup, level_high_score_tup)
                 game_over_text.append(self.craft_element('CLICK TO PLAY', 30, 'center', (0, 65)))
         else:
             game_over_text = []
             game_over_hud = []
         return game_over_text + game_over_hud
             
-    def set_title_elements(self, points_high_score, level_high_score, points=0, level=1):
+    def set_title_elements(self, points_high_score_tup: tuple, level_high_score_tup: tuple, points=0, level=1):
         self.title_elements = [
             self.craft_element('ASTEROIDS', (150), 'center', (0, -40)),
             self.craft_element('Lucas Wiedmann', (50), 'center', (0, (DisplayElement.y_scrnsize()/2)-translate_to_ratio(120)), font_name='signature', custom_font_path='signature.otf'),
             self.craft_element('CLICK TO PLAY', (30), 'center', (0, 65)),
             # self.craft_element('Named best game of all time by Obama', (40), 'lower_left', (50,-50), font_name='minecraft', custom_font_path='minecraft_font.ttf')
         ]
-        self.title_elements += self.score_high_score_elements(points, level, points_high_score, level_high_score)
+        self.title_elements += self.score_high_score_elements(points, level, points_high_score_tup, level_high_score_tup)
         
-    def render_title_screen(self, points_high_score, level_high_score):
-        self.set_title_elements(points_high_score, level_high_score)
+    def render_title_screen(self, points_high_score_tup: tuple, level_high_score_tup: tuple):
+        self.set_title_elements(points_high_score_tup, level_high_score_tup)
         for element in self.title_elements:
             element.render(self.screen)
         
@@ -314,16 +321,10 @@ class DisplaySpaceshipLives:
         try:
             cls.instances.pop()
         except IndexError as e:
-            print(e)
             pass
     
     @classmethod
     def render(cls, screen):
-        print(len(cls.instances))
+        # print(len(cls.instances))
         for instance in cls.instances:
             instance.render_instance(screen)
-
-# class DisplaySpaceshipLivesList:
-#     @staticmethod
-#     def render():
-#         DisplaySpaceshipLives.

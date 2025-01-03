@@ -1,62 +1,20 @@
-import os
 import json
 from utils import HIGH_SCORES_FILE
-
 class HighScoresManager:
-    """
-    A class to manage loading, saving, and updating high scores.
-    """
-
     def __init__(self, file_path=HIGH_SCORES_FILE):
         self.file_path = file_path
-        self.high_scores = self.load_high_scores()
+        self.high_scores = self.get_high_scores_from_file()
+        
 
-    def load_high_scores(self):
-        """
-        Load high scores from the JSON file.
-
-        Returns:
-            dict: A dictionary of player names and scores.
-        """
-        if not os.path.exists(self.file_path):
-            return {}
-
-        try:
-            with open(self.file_path, 'r') as file:
-                return json.load(file)
-        except json.JSONDecodeError:
-            print("Error reading high scores file. Returning empty scores.")
-            return {}
-
-    def save_high_scores(self, points_high_score, level_high_score):
-        """
-        Save high scores to the JSON file.
-        """
-        try:
-            with open(self.file_path, 'w') as file: #switch to append?
-                json.dump(self.high_scores, file, indent=4)
-        except IOError as e:
-            print(f"Error saving high scores: {e}")
-
-    def add_score(self, player_name, score, level):
-        """
-        Add or update a player's score.
-
-        Args:
-            player_name (str): The name of the player.
-            score (int): The player's score.
-        """
-        if player_name in self.high_scores:
-            if score > self.high_scores[player_name]:
-                self.high_scores[player_name] = score
-                print(f"Updated high score for {player_name} to {score}.")
-        else:
-            self.high_scores[player_name] = score
-            print(f"Added new high score for {player_name}: {score}.")
-
-        self.save_high_scores(score, level)
-
-    def get_top_scores(self, limit=10):
+    def is_high_score(self, score: int, score_type: str) -> bool:
+        try: 
+            _, high_score = self.get_top_scores(score_type)[0]
+            # print(high_score)
+            return score >= high_score
+        except KeyError as e:
+            return False
+    
+    def get_top_scores(self, score_type: str, limit=10) -> tuple:
         """
         Retrieve the top scores.
 
@@ -66,15 +24,40 @@ class HighScoresManager:
         Returns:
             list: A list of tuples containing player names and scores, sorted by score.
         """
-        sorted_scores = sorted(self.high_scores.items(), key=lambda item: item[1], reverse=True)
+        sorted_scores = sorted(self.high_scores[score_type].items(), key=lambda item: item[1], reverse=True)
         return sorted_scores[:limit]
     
-    def get_top_score(self):
-        return self.get_top_scores()[0][1]
+    def get_high_scores_from_file(self):
+       # Load the JSON file into a dictionary
+        with open(self.file_path, "r") as file:
+            data = json.load(file)
+        return data
+    
+    def get_player_high_scores(self, name):
+        pass
+    
+    def save_new_high_score(self, name: str, score: int, score_type: str):
+        self.high_scores[score_type][name] = score
+        self._save_high_scores_to_file()
+    
+    def _save_high_scores_to_file(self):
+        try:
+            with open(self.file_path, 'w') as file: #switch to append?
+                json.dump(self.high_scores, file, indent=4)
+        except IOError as e:
+            print(f"Error saving high scores: {e}")
 
-    def is_high_score(self, score):
-        top_scores = self.get_top_scores()
-        if top_scores:
-            # print(score, top_scores[0])
-            return score > top_scores[0][1]
-        return True
+    def get_both_high_scores(self):
+        name_points, points_high_score = self.get_top_score('points')
+        name_level, level_high_score = self.get_top_score('level')
+        return (name_points, points_high_score), (name_level, level_high_score)
+    
+    def get_top_score(self, score_type: str):
+        return self.get_top_scores(score_type)[0]
+        # print(type(self.high_scores))
+        # print(self.high_scores)
+        hss = self.high_scores[score_type]
+        max_name = max(hss, key=hss.get)
+        high_score = hss[max_name]
+        return (max_name, high_score)
+    

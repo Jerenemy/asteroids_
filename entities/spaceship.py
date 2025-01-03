@@ -23,7 +23,6 @@ class Spaceship(SpaceEntity):
         try:
             return pg.display.get_window_size()[0]
         except pg.error as e:
-            # print(e)
             return X_SCRNSIZE
         
     @property
@@ -31,7 +30,6 @@ class Spaceship(SpaceEntity):
         try:
             return pg.display.get_window_size()[1]
         except pg.error as e:
-            # print(e)
             return Y_SCRNSIZE
     
     def should_despawn(self):

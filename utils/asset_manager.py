@@ -154,29 +154,3 @@ class AssetManager:
         full_path = os.path.join(self.base_path, "data", relative_path)
         content = "\n".join(f"{name}:{score}" for name, score in high_scores)
         save_to_file(full_path, content)
-
-# Example Usage:
-if __name__ == "__main__":
-    pygame.init()
-    asset_manager = AssetManager()
-
-    # Load assets
-    asset_manager.load_image("player", "player.png", colorkey=(255, 255, 255))
-    asset_manager.load_sound("explosion", "explosion.wav")
-    asset_manager.load_font("main_font", "font.ttf", 24)
-
-    # Retrieve assets
-    player_image = asset_manager.get_image("player")
-    explosion_sound = asset_manager.get_sound("explosion")
-    main_font = asset_manager.get_font("main_font")
-
-    # High Scores
-    high_scores = asset_manager.load_high_scores("high_scores.txt")
-    print("Loaded High Scores:", high_scores)
-
-    # Save new high scores
-    new_scores = [("Alice", 3000), ("Bob", 2500)]
-    asset_manager.save_high_scores("high_scores.txt", new_scores)
-
-    # Clean up pygame
-    pygame.quit()

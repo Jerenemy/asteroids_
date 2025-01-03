@@ -28,9 +28,6 @@ class LevelManager:
     def level_duration(self):
         return self.level_time_manager.delta_time
 
-    # @property
-    # def current_level_time(self):
-    #     return self.level_time_manager.current_time
     @property
     def elapsed_level_time(self):
         return self.level_time_manager.elapsed_time
@@ -74,14 +71,9 @@ class LevelManager:
         Check if the current level's time has elapsed and advance the level if necessary.
         """
         self.display_new_level = self.check_display_new_level_allowed()
-        # if self.display_new_level != self.prev_display_new_level:
-        #     print(self.display_new_level)
-            # self.prev_display_new_level = self.display_new_level
-        # print(self.display_new_level)
-        # print(f"level time manager curr time: {self.level_time_manager.current_time}, prev time: {self.level_time_manager.prev_time}")
-        print(
-            f"\ncurr = {self.level_time_manager.current_time}\n, paus time = {self.level_time_manager.paused_time}\n, prev tot paused = {self.level_time_manager.prev_tot_paused_time}\n, elapsed = {self.level_time_manager.elapsed_time}\n, delta = {self.level_time_manager.delta_time}"
-        )
+        # print(
+        #      f"\ncurr = {self.level_time_manager.current_time}\n, paus time = {self.level_time_manager.paused_time}\n, prev tot paused = {self.level_time_manager.prev_tot_paused_time}\n, elapsed = {self.level_time_manager.elapsed_time}\n, delta = {self.level_time_manager.delta_time}"
+        # )
         if self.level_time_manager.check_delta_time_elapsed():
             self.display_new_level_time_manager = TimeManager(delta_time=2000)
             self.display_new_level = True

@@ -34,26 +34,37 @@ class GameState:
         self.state = "menu"  # Possible states: 'menu', 'playing', 'paused', 'game_over'
         self.level_manager = None # to be initialized upon game start  
         self.fullscreen = False
+        self.name = None
 
 
     @property
     def current_level(self):
         return self.level_manager.current_level
     
-    def get_high_score(self, score_type: str):
-        # if score_type == 'points': # TODO: implement level high scores
-        if high_scores_manager.is_high_score(self.points):
-            high_scores_manager.save_high_scores(self.points)
-        return high_scores_manager.get_top_score()
-        # elif score_type == 'level':
+    def get_high_score(self, score_type: str) -> tuple:
+        if self.state != "game_over":
+            return high_scores_manager.get_top_score(score_type)
+        if score_type == 'points': # TODO: implement level high scores
+            if high_scores_manager.is_high_score(self.points, score_type):
+                if self.name is None:
+                    self.name = self.get_initials()
+                high_scores_manager.save_new_high_score(self.name, self.points, score_type)
+        elif score_type == 'level':
+            if high_scores_manager.is_high_score(self.current_level, score_type):
+                if self.name is None:
+                    self.name = self.get_initials()
+                high_scores_manager.save_new_high_score(self.name, self.current_level, score_type)
+        return high_scores_manager.get_top_score(score_type)
        
+    def get_initials(self):
+        return "JZ"
+    
     @property
     def x_scrnsize(self):
         try:
             x, _ = pg.display.get_window_size()
             return x
         except pg.error as e:
-            # print(e)
             return X_SCRNSIZE
     
     @property
@@ -62,7 +73,6 @@ class GameState:
             _, y = pg.display.get_window_size()
             return y
         except pg.error as e:
-            # print(e)
             return Y_SCRNSIZE 
         
     def toggle_fullscreen(self):
@@ -91,8 +101,6 @@ class GameState:
         elif self.state == "game_over" and is_mouse_pressed(SPACEBAR):
             self.reset_game()  
         elif self.state == "paused":
-            # TimeManager.list_all_instances([self.level_manager.level_time_manager])
-            # print('instance paused: ',self.level_manager.level_time_manager.paused)
             if keys_manager(pg.K_p):
                 self.resume_game()
 
@@ -104,7 +112,6 @@ class GameState:
             bullet = Bullet(x, y, 3, BULLET_SPEED, direction, WHITE)
             object_manager.add_object(bullet)
             sound_manager.play_event_sound('shoot')
-            # print(f"added object, len bullet list = {len(object_manager.objects['bullets'])}")
 
     def update_game(self):
         """Update game objects and logic if in 'playing' state."""
@@ -275,7 +282,7 @@ class GameState:
         object_manager.get_user_spaceship().lost_all_lives = True
         print(f"Game over. Final score: { self.points}")
         # Add score to high scores if it's high enough
-        high_scores_manager.add_score("Player", self.points, self.current_level)
+        # high_scores_manager.add_score("Player", self.points, self.current_level)
 
     def lose_life(self):
         """
@@ -286,13 +293,6 @@ class GameState:
         DisplaySpaceshipLives.remove_life()
         if self.lives <= 0:
             self.end_game()
-
-    # def advance_level(self):
-    #     """
-    #     Advance to the next level and increase the difficulty.
-    #     """
-    #     # self.current_level += 1
-    #     print(f"Level {self.current_level} started. Prepare yourself!")
 
     def add_score(self, points):
         """
