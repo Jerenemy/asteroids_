@@ -12,6 +12,7 @@ def main():
         game_state.handle_collisions()
         game_state.render_game()
         game_state.play_sounds()
+        game_state.hide_cursor_while_playing()
         clock.tick(FPS)
     cleanup()
 

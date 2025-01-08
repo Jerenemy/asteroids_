@@ -115,7 +115,7 @@ class UserSpaceshipDeathAnimation(Animation):
 
     def _calculate_lines(self):
         vertices = self.polygon.vertices
-        directions = [-90, 90, 180]  # Angles for line dispersion
+        directions = [-90, -90, 180]  # Angles for line dispersion
 
         new_lines = []
         for idx, angle in enumerate(directions):

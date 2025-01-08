@@ -226,7 +226,7 @@ class Display:
     def set_title_elements(self, points_high_score_tup: tuple, level_high_score_tup: tuple, points=0, level=1):
         self.title_elements = [
             self.craft_element('ASTEROIDS', (150), 'center', (0, -40)),
-            self.craft_element('Lucas Wiedmann', (50), 'center', (0, (DisplayElement.y_scrnsize()/2)-translate_to_ratio(120)), font_name='signature', custom_font_path='signature.otf'),
+            self.craft_element('Jeremy Zay', (50), 'center', (0, (DisplayElement.y_scrnsize()/2)-translate_to_ratio(120)), font_name='signature', custom_font_path='signature.otf'),
             self.craft_element('CLICK TO PLAY', (30), 'center', (0, 65)),
             # self.craft_element('Named best game of all time by Obama', (40), 'lower_left', (50,-50), font_name='minecraft', custom_font_path='minecraft_font.ttf')
         ]
@@ -251,8 +251,12 @@ class Display:
             element.render(self.screen)
         
     def render_paused(self):
-        pause_element = self.craft_element('P A U S E D', 40, 'center', (0, -X_SCRNSIZE/2+20))
+        # print('rendering paused')
+        pause_element = self.craft_element('P A U S E D', 40, 'center', (0, (-Y_SCRNSIZE/2)+60))
         pause_element.render(self.screen)
+        # print((-X_SCRNSIZE/2)+60)
+        # pause_element = self.craft_element('P A U S E D', 40, 'center', (0, -200))
+        # pause_element.render(self.screen)
         
     def clear_elements(self):
         """Remove all elements from the display."""
@@ -356,3 +360,8 @@ class DisplaySpaceshipLives:
         # print(len(cls.instances))
         for instance in cls.instances:
             instance.render_instance(screen)
+
+    @classmethod
+    def wipe_lives(cls):
+        cls.lives = 0
+        cls.instances = []

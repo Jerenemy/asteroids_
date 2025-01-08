@@ -2,12 +2,19 @@
     "points": {
         "JTZ": 0,
         "PVV": 10,
-        "QQQ": 60
+        "PSR": 310,
+        "CTN": 440,
+        "TCD": 700,
+        "QQQ": 1260,
+        "TRG": 1970,
+        "TNN": 2000,
+        "TNC": 2850,
+        "TOI": 3600
     },
     "level": {
-        "JTZ": 0,
-        "LLL": 2,
-        "LSC": 3,
-        "AAA": 4
+        "JTZ": 9,
+        "PRS": 5,
+        "QQQ": 6,
+        "TRG": 8
     }
 }

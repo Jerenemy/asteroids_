@@ -3,9 +3,9 @@
 
 # Import specific modules or classes from the package
 from .space_entity import SpaceEntity
-from .spaceship import Spaceship, UserSpaceship
+from .spaceship import Spaceship, UserSpaceship, EnemySpaceship
 from .asteroid import Asteroid
-from .bullet import Bullet
+from .bullet import Bullet, UserBullet, EnemyBullet
 # from .level import Level
 
 # Optionally, define an __all__ list to control imports with 'from entities import *'

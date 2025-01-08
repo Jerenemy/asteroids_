@@ -143,3 +143,43 @@ class RocketPolygon(UserSpaceshipPolygon):
         x_rocketright = self.center_x + ((self.size * .8) * cos(pi / 180 * (180 - 20 + self.orientation - 90) ))
         y_rocketright = self.center_y + ((self.size * .8) * sin(pi / 180 * (180 - 20 + self.orientation - 90) ))
         return [(x_rocket, y_rocket), (x_rocketleft, y_rocketleft), (x_rocketright, y_rocketright)]
+
+
+class EnemySpaceshipPolygon(Polygon):
+    def __init__(self, center_x, center_y, color, width, size):
+        super().__init__(center_x, center_y, color, width)
+        self.size = size
+        # self.orientation = 0
+        
+    @property
+    def vertices(self):
+        #LEFT
+        #1,2,3,4
+        xL1 = self.center_x + (self.size * .9 * cos(pi / 180 * (350 +  - 90) ))
+        yL1 = self.center_y + (self.size * .9 * sin(pi / 180 * (350 +  - 90) ))
+
+
+        xL2 = self.center_x + (self.size * .6 * cos(pi / 180 * (360 - 45 +  - 90) ))
+        yL2 = self.center_y + (self.size * .6 * sin(pi / 180 * (360 - 45 +  - 90) ))
+
+        xL3 = self.center_x + (self.size * 1 * cos(pi / 180 * (270 +  - 90) ))
+        yL3 = self.center_y + (self.size * 1 * sin(pi / 180 * (270 +  - 90) ))
+
+        xL4 = self.center_x + (self.size * .8 * cos(pi / 180 * (225 +  - 90) ))
+        yL4 = self.center_y + (self.size * .8 * sin(pi / 180 * (225 +  - 90) ))
+
+        #RIGHT
+        xR1 = self.center_x + (self.size * .9 * cos(pi / 180 * (10 +  - 90) ))
+        yR1 = self.center_y + (self.size * .9 * sin(pi / 180 * (10 +  - 90) ))
+
+
+        xR2 = self.center_x + (self.size * .6 * cos(pi / 180 * (45 +  - 90) ))
+        yR2 = self.center_y + (self.size * .6 * sin(pi / 180 * (45 +  - 90) ))
+
+        xR3 = self.center_x + (self.size * 1 * cos(pi / 180 * (90 +  - 90) ))
+        yR3 = self.center_y + (self.size * 1 * sin(pi / 180 * (90 +  - 90) ))
+
+        xR4 = self.center_x + (self.size * .8 * cos(pi / 180 * (135 +  - 90) ))
+        yR4 = self.center_y + (self.size * .8 * sin(pi / 180 * (135 +  - 90) ))
+
+        return [(xL1,yL1), (xL2,yL2), (xR2,yR2), (xL2,yL2), (xL3,yL3), (xR3,yR3), (xL3,yL3), (xL4,yL4), (xR4,yR4), (xR3,yR3), (xR2,yR2), (xR1,yR1)]

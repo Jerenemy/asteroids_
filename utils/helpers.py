@@ -1,6 +1,7 @@
 from random import choice
-from .constants import WHITE, YELLOW, ORANGE, RED, GREEN, BLUE, PURPLE, Y_SCRNSIZE
+from .constants import WHITE, YELLOW, ORANGE, RED, GREEN, BLUE, PURPLE, Y_SCRNSIZE, DEG2RAD, RAD2DEG
 from pygame import display
+from math import atan
 
 def load_from_file(filepath):
     try:
@@ -19,7 +20,7 @@ def clamp(value, min_value, max_value):
     pass
 
 def choose_color():
-    return choice([YELLOW, ORANGE, RED, GREEN, BLUE, PURPLE])
+    return choice([YELLOW, ORANGE, GREEN, BLUE, PURPLE])
 
 def get_list_item_by_type(lst, typ):
     """Gets the first instance of the item of 'typ' from 'lst'."""
@@ -52,3 +53,26 @@ def sign(n):
     elif n < 0:
         return -1
     else: return 0
+    
+    
+def get_direction_to(origin_object, target_object):    
+    try: 
+        xx = target_object.x - origin_object.x
+        yy = target_object.y - origin_object.y
+
+        if xx < 0:
+            fire_direction = (atan(yy/xx) - 90 * DEG2RAD) * RAD2DEG
+        if xx > 0:
+            fire_direction = (atan(yy/xx) + 90 * DEG2RAD) * RAD2DEG
+        if xx == 0:
+            if yy >= 0: 
+                fire_direction = 180
+            if yy < 0:
+                fire_direction = 0 
+        return fire_direction
+    except AttributeError:
+        return 0
+    
+    
+def flipcoin():
+    return choice([True, False])

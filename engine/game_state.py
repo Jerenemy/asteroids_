@@ -1,12 +1,12 @@
 import pygame as pg
 from graphics import Display, AnimationManager, ParticleExplosionAnimation, UserSpaceshipDeathAnimation, RenderManager, DisplaySpaceshipLives
 from .object_manager import ObjectManager
-from entities import UserSpaceship, Asteroid, Bullet
+from entities import UserSpaceship, Asteroid, Bullet, UserBullet, EnemyBullet, EnemySpaceship
 from .high_scores_manager import HighScoresManager
 from .level_manager import LevelManager
 from sounds import SoundManager
 WAIT_AFTER_ENTERING_INITIALS_TIME = 1000
-from utils import AssetManager, is_mouse_pressed, check_quit, choose_color, X_SCRNSIZE, Y_SCRNSIZE, WHITE, BULLET_SPEED, KeysManager, SSHIP_DESTRUCTION_DURATION, SPACEBAR, MAX_X_SCRNSIZE, MAX_Y_SCRNSIZE, TimeManager, is_key_pressed, WAIT_AFTER_ENTERING_INITIALS_TIME, INVULNERABLE_TIME
+from utils import AssetManager, is_mouse_pressed, check_quit, choose_color, X_SCRNSIZE, Y_SCRNSIZE, WHITE, BULLET_SPEED, KeysManager, SSHIP_DESTRUCTION_DURATION, LEFT_CLICK, MAX_X_SCRNSIZE, MAX_Y_SCRNSIZE, TimeManager, is_key_pressed, WAIT_AFTER_ENTERING_INITIALS_TIME, INVULNERABLE_TIME, BULLET_SIZE
 
 # INITIALIZE OBJECTS
 high_scores_manager = HighScoresManager()
@@ -33,12 +33,13 @@ class GameState:
         self.max_lives = lives
         self.points = points
         self.state = "title_menu"  # Possible states: 'title_menu', 'playing', 'paused', 'game_over', 'new_high_score', 'game_over_menu'
-        self.level_manager = None # to be initialized upon game start  
+        self.level_manager = LevelManager(asset_manager) # to be re-initialized upon game start  
         self.fullscreen = False
         self.name = None
         self.initials = []
         self.last_high_score_initials = None
         self.delay_trans_tm = None # will be init'ed to be a TimeManager that delays the transition away from the new_high_score state so you can see the initials you entered for a sec
+        self.allow_lose_life = False
 
 
     @property
@@ -48,10 +49,9 @@ class GameState:
     def get_high_score(self, score_type: str) -> tuple:
         if self.state != "game_over_menu":
             return high_scores_manager.get_top_score(score_type)
-        if score_type == 'points': # TODO: implement level high scores
+        if score_type == 'points':
             if high_scores_manager.is_high_score(self.points, score_type):
-                # TODO: FIX THIS. this is not going to work since get_initials cant be completed in one call. maybe need to change the state. (but still want to render the game over at the end)
-                print(self.last_high_score_initials, 'here')
+                print(self.last_high_score_initials)
                 high_scores_manager.save_new_high_score(self.last_high_score_initials, self.points, score_type)
         elif score_type == 'level':
             if high_scores_manager.is_high_score(self.current_level, score_type):
@@ -84,6 +84,12 @@ class GameState:
             screen = pg.display.set_mode((MAX_X_SCRNSIZE, MAX_Y_SCRNSIZE), pg.FULLSCREEN)
             self.fullscreen = True
 
+    def hide_cursor_while_playing(self):
+        if self.state == "playing":
+            pg.mouse.set_visible(0)
+        else:
+            pg.mouse.set_visible(1)
+
     def handle_events(self):
         """Process input and update the state accordingly."""
         for event in pg.event.get():
@@ -96,10 +102,14 @@ class GameState:
             if is_key_pressed(pg.K_q):
                 self.state = "exit"
                 return
-        if self.state == "title_menu" and is_mouse_pressed(SPACEBAR):
-            self.start_game()
+        if self.state == "title_menu":
+            if is_mouse_pressed(LEFT_CLICK) or is_key_pressed(pg.K_SPACE):
+                self.start_game()
+        elif self.state == "game_over_menu":
+            if is_mouse_pressed(LEFT_CLICK) or is_key_pressed(pg.K_SPACE):
+                self.start_game()
         elif self.state == "playing":
-            self.handle_bullet_firing()
+            self.handle_user_bullet_firing()
             if keys_manager.is_key_pressed(pg.K_p):
                 self.pause_game()
         elif self.state == "game_over":
@@ -108,8 +118,6 @@ class GameState:
                 if self.is_high_score():  
                     self.state = "new_high_score"
                 else: self.state = "game_over_menu"
-        elif self.state == "game_over_menu" and is_mouse_pressed(SPACEBAR):
-            self.reset_game()
         elif self.state == "new_high_score":
             initial = keys_manager.get_key_pressed_once()
             if initial is not None and len(self.initials) < 3:
@@ -117,61 +125,99 @@ class GameState:
             if self.delay_trans_tm is None and len(self.initials) == 3:
                 self.delay_trans_tm = TimeManager(WAIT_AFTER_ENTERING_INITIALS_TIME)
             if self.delay_trans_tm is not None and self.delay_trans_tm.check_delta_time_elapsed():
-                print(self.initials)
                 self.last_high_score_initials = ''.join(self.initials) # if i wipe the initials now, is that fine? i need to pass the initials into the init_layers_to_render
                 self.delay_trans_tm = None
                 self.state = "game_over_menu"
         elif self.state == "paused":
             if keys_manager.is_key_pressed(pg.K_p):
                 self.resume_game()
+            if keys_manager.is_key_pressed(pg.K_r):
+                self.reset_game()
+                # self.end_game()
+                # TimeManager.paused = False
+                # DisplaySpaceshipLives.wipe_lives()
+                # self.lives = 0
+                # self.state = "title_menu"
             
-
-    # NOTE: should add_asteroids be a method in object_manager, if it depends on the level from the game_state?
-    def handle_bullet_firing(self):
-        if keys_manager.is_key_pressed(pg.K_SPACE):
+    def handle_user_bullet_firing(self):
+        if not object_manager.get_user_spaceship().is_destroying and keys_manager.is_key_pressed(pg.K_SPACE):
             # need access to spaceship attributes to initialize bullet
-            x, y, direction = Bullet.get_bullet_launch_attributes(object_manager.get_user_spaceship())
-            bullet = Bullet(x, y, 3, BULLET_SPEED, direction, WHITE)
+            user_sship = object_manager.get_user_spaceship()
+            x, y, direction, sship_speed = Bullet.get_bullet_launch_attributes(user_sship.x, user_sship.y, user_sship.size, user_sship.orientation, user_sship.speed)
+            bullet = UserBullet(x, y, BULLET_SIZE, BULLET_SPEED+sship_speed, direction, WHITE)
             object_manager.add_object(bullet)
             sound_manager.play_event_sound('shoot')
 
+    # def handle_enemy_bullet_firing(self):
+    #     # object_manager.get_user_spaceship()
+    #     x, y, direction, sship_speed = Bullet.get_bullet_launch_attributes(user_sship.x, user_sship.y, user_sship.size, user_sship.orientation, user_sship.speed)
+    #     bullet = Bullet(x, y, 3, BULLET_SPEED+sship_speed, direction, WHITE)
+    #     object_manager.add_object(bullet)
+    #         # sound_manager.play_event_sound('shoot')
+            
+
+        
     def update_game(self):
         """Update game objects and logic if in 'playing' state."""
         if self.state != "paused":
             object_manager.update_objects()
             animation_manager.update_animations()  # Update animations
             self.handle_collisions()  # Handle collisions and update state
+            self.add_enemies()
             if self.state == "playing":
-                self.add_asteroids()
-                self.level_manager.update()
+                object_manager.fire_enemy_sship_bullets(self.current_level)
+                self.level_manager.update(
+                    len(object_manager.get_object_list2('asteroids'))
+                    + len(object_manager.get_object_list2('enemy_spaceships'))
+                )
+                self.lose_life_after_destruction()
 
-    def add_asteroids(self): # TODO: incorporate generation based on level
+    def add_enemies(self): # TODO: incorporate generation based on level
         """
         Add a new asteroid to the game if the appropriate time has elapsed.
         """
+        if not self.level_manager.new_level_approaching:
+            self.add_asteroids()
+            self.add_enemy_sships()
+    
+    def add_asteroids(self):
         if not self.level_manager.asteroid_time_manager.check_delta_time_elapsed():
+            # print(self.level_manager.asteroid_time_manager.elapsed_time, self.level_manager.asteroid_time_manager.delta_time)
             return
+        # add asteroids
         x, y, direction, size = Asteroid.generate_random_attributes(self.x_scrnsize, self.y_scrnsize)
         color = choose_color()
         asteroid = Asteroid(x, y, size, direction, color)
         object_manager.add_object(asteroid)
+        
+    def add_enemy_sships(self):
+        if not self.level_manager.enemy_sship_time_manager.check_delta_time_elapsed():
+            return
+        color, x, y, size, speed, direction = EnemySpaceship.generate_random()
+        # print(color, x, y, direction)
+        enemy_sship = EnemySpaceship(x, y, size, speed, direction, color, screen, sound_manager)
+        object_manager.add_object(enemy_sship)
+        # print('added')
     
+        
     def handle_collisions(self):
         """Process collision events and update game state."""
         collision_events = object_manager.get_collision_events()
         for event in collision_events:
             if event['type'] == 'bullet_hit_asteroid':
                 ast = event['asteroid']
-                self.add_score(ast.points)
+                if isinstance(event['collided_with'], UserBullet):
+                    self.add_score(ast.points)
                 # Trigger animation
                 animation_manager.add_animation(
                     ParticleExplosionAnimation(ast.x, ast.y, ast.color, particle_count=ast.size//8, max_lifetime=ast.size//8)
                 )
             elif event['type'] == 'user_spaceship_hit':
+                # continue
                 sship = event['spaceship']
                 if sship.is_destroying or sship.lost_all_lives: # don't allow for destroy if already destroyed
                     continue
-                sship.is_destroying = True  # Set the state flag
+                sship.is_destroying = True 
                 sship.delay_game_over_display = True
                 animation_manager.add_animation(
                     UserSpaceshipDeathAnimation(sship, SSHIP_DESTRUCTION_DURATION)
@@ -179,7 +225,20 @@ class GameState:
                 animation_manager.add_animation(
                     ParticleExplosionAnimation(sship.x, sship.y, sship.color, particle_count=(sship.size//4), max_lifetime=(sship.size))
                 )
-                self.lose_life()
+                self.allow_lose_life = True
+                # self.lose_life()
+            elif event['type'] == 'enemy_spaceship_hit':
+                enemy_sship = event['spaceship']
+                if isinstance(event['collided_with'], UserBullet):
+                    self.add_score(enemy_sship.points)
+                # print(
+                #     enemy_sship.x, 
+                #     enemy_sship.y, 
+                #     'enemy sship destroyed'
+                # )
+                animation_manager.add_animation(
+                    ParticleExplosionAnimation(enemy_sship.x, enemy_sship.y, enemy_sship.color, particle_count=enemy_sship.size//8, max_lifetime=enemy_sship.size//8)
+                )
             sound_manager.play_event_sound(event['type'])
 
     def play_sounds(self): # TODO: fix this
@@ -220,7 +279,7 @@ class GameState:
         render_manager.add_layer(
             lambda screen: display.render_hud(self.points, self.lives),
             z_index=4,
-            states=["playing"]
+            states=["playing", "paused"]
         )
         usship = object_manager.get_user_spaceship()
         # Add a menu layer (only in 'menu' state)
@@ -268,7 +327,6 @@ class GameState:
     
     def is_high_score(self):
         b = high_scores_manager.is_high_score(self.points, 'points') or high_scores_manager.is_high_score(self.current_level, 'level')
-        print(b, 'ahhhhhh')
         return b
     
 
@@ -281,17 +339,17 @@ class GameState:
         self.lives = self.max_lives
         self.points = 0
         print("Game started.")
-        if not object_manager.objects['spaceships']: # TODO: as long as there's not a USER spaceship
-            object_manager.add_object(UserSpaceship(
-                self.x_scrnsize/2, 
-                self.y_scrnsize/2, 
-                20, 
-                0, 
-                0, 
-                WHITE, 
-                screen, 
-                sound_manager
-            ))
+        object_manager.wipe_obj_lists()
+        object_manager.add_object(UserSpaceship(
+            self.x_scrnsize/2, 
+            self.y_scrnsize/2, 
+            20, 
+            0, 
+            0, 
+            WHITE, 
+            screen, 
+            sound_manager
+        ))
         for _ in range(self.max_lives-1):
             DisplaySpaceshipLives.add_life(screen)
         sship = object_manager.get_user_spaceship()
@@ -328,16 +386,35 @@ class GameState:
         # Add score to high scores if it's high enough
         # high_scores_manager.add_score("Player", self.points, self.current_level)
 
+    def reset_game(self):
+        self.end_game()
+        TimeManager.paused = False
+        DisplaySpaceshipLives.wipe_lives()
+        self.lives = 0
+        self.state = "title_menu"
+        
     def lose_life(self):
         """
         Decrease the player's lives by one and check for game over.
         """
         self.lives -= 1
         print(f"Lives remaining: {self.lives}")
-        DisplaySpaceshipLives.remove_life()
+        DisplaySpaceshipLives.remove_life() # only want to remove a life after the sship death animation completes and the sship respawns
+        # 2 ways: either don't call lose_life until death animation complete, or detect when death animation complete and call remove_life then. 
+        # problem with second way: couldn't just call lose_life once, would need to be checking every time
+        # problem with first way: if call lose life after delay, does the delay_game_over timer get messed up? maybe it simplifies it
+        # quick fix: just add another life while sship is destroying
+        self.allow_lose_life = False
         if self.lives <= 0:
+            # object_manager.get_user_spaceship().delay_game_over_display = True
             self.end_game()
 
+    def lose_life_after_destruction(self):
+        if self.allow_lose_life:
+            if self.lives == 1 or not object_manager.get_user_spaceship().is_destroying: # for last life, forget about the delay
+                self.lose_life()
+                
+            
     def add_score(self, points):
         """
         Add points to the player's score.
@@ -346,15 +423,7 @@ class GameState:
             points (int): The number of points to add.
         """
         self.points += points
-        print(f"Score updated: {self.points}")
-
-    def reset_game(self):
-        """
-        Reset the game state to prepare for a new game.
-        """
-        self.initials = []
-        if not object_manager.get_user_spaceship().is_destroying:
-            self.start_game()
+        # print(f"Score updated: {self.points}")
 
     def get_game_state(self):
         """

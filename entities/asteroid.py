@@ -7,12 +7,12 @@ from utils import RandomPolygon
 
 class Asteroid(SpaceEntity):
     def __init__(self, x, y, size, direction, color, speed=None, width=3):
-        speed = speed or (300 / size + 1 )
+        speed = speed or (100 / size + 1 )
         super().__init__(x, y, size, speed, direction, color)
         self.width = width
         self.sides = 8
         self.polygon = RandomPolygon(x, y, size, self.sides, color, 3, self._radii)
-        self.min_size = 30
+        self.min_size = 10
         self.points = 10 if size > self.min_size*2 else 100
         
     def should_despawn(self):
@@ -54,19 +54,19 @@ class Asteroid(SpaceEntity):
         if edge == 'top':  # Spawns at the top edge, moves downward
             x = randint(0, screen_width)
             y = -size
-            direction = randint(0, 180)  # Angles to move downward and onto the screen
+            direction = randint(10, 170) # randint(0, 180)  # Angles to move downward and onto the screen
         elif edge == 'right':  # Spawns at the right edge, moves leftward
             x = screen_width + size
             y = randint(0, screen_height)
-            direction = randint(90, 270)  # Angles to move leftward and onto the screen
+            direction = randint(100, 260) # randint(90, 270)  # Angles to move leftward and onto the screen
         elif edge == 'bottom':  # Spawns at the bottom edge, moves upward
             x = randint(0, screen_width)
             y = screen_height + size
-            direction = randint(180, 360)  # Angles to move upward and onto the screen
+            direction =  randint(190, 350) # randint(180, 360)  # Angles to move upward and onto the screen
         elif edge == 'left':  # Spawns at the left edge, moves rightward
             x = -size
             y = randint(0, screen_height)
-            direction = randint(270, 450)  # Angles to move rightward and onto the screen
+            direction =  randint(290, 440) # randint(270, 450)  # Angles to move rightward and onto the screen
         return x, y, direction, size
     
     def split(self):

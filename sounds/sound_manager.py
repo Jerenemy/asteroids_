@@ -21,7 +21,7 @@ class SoundManager:
             self.get_sound('asteroid_explosion', 'bangLarge.wav').play()
         elif event_type == 'user_spaceship_hit':
             self.get_sound('explosion', 'bangMedium.wav').play()
-        elif event_type == 'automated_spaceship_hit':
+        elif event_type == 'enemy_spaceship_hit':
             self.get_sound('explosion', 'bangSmall.wav').play()
         elif event_type == 'shoot':
             self.get_sound('shoot', 'fire.wav').play()
@@ -50,4 +50,3 @@ class LevelSoundManager(SoundManager):
             else:
                 self.get_sound('bip2', 'beat2.wav').play()
                 self.last_level_sound_played = 2
-        pass

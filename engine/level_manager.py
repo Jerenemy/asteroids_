@@ -1,8 +1,8 @@
-from utils import TimeManager, AssetManager
+from utils import TimeManager, AssetManager, SHORTEN_AST_DELTA_TIME, SHORTEN_SSHIP_DELTA_TIME, LEVEL_DURATION_INCREASE
 from sounds import LevelSoundManager
 
 class LevelManager:
-    def __init__(self, asset_manager: AssetManager, initial_level=1, level_duration=5000, asteroid_delta_time=1000):
+    def __init__(self, asset_manager: AssetManager, initial_level=1, level_duration=5000, asteroid_delta_time=3000, enemy_sship_delta_time=3000):
         """
         Initialize the LevelManager.
 
@@ -11,18 +11,23 @@ class LevelManager:
             level_duration (int): Duration of each level in milliseconds.
         """
         self.current_level = initial_level
+        self.new_level_approaching = None
         self.asset_manager = asset_manager
-        # self.prev_display_new_level = self.display_new_level # debugging
         TimeManager.clear_instances()
         self.level_time_manager = TimeManager(delta_time=level_duration)
         self.sound_manager = LevelSoundManager(self.asset_manager, level_duration)
-        
+        # new level
         self.display_new_level = True
         self.display_new_level_time_manager = TimeManager(delta_time=2000)
-        
-        # self.asteroid_delta_time = 1000
+        # asteroids
+        self.longest_asteroid_delta_time = asteroid_delta_time
         self.asteroid_time_manager = TimeManager(delta_time=asteroid_delta_time)
+        # enemy sship
+        self.longest_enemy_sship_delta_time = enemy_sship_delta_time
+        self.enemy_sship_time_manager = TimeManager(delta_time=enemy_sship_delta_time)
+        # sounds
         self.level_sound_time_manager = TimeManager(delta_time=2000)
+
 
     @property
     def level_duration(self):
@@ -59,36 +64,44 @@ class LevelManager:
                    )
                 * dim
             ) 
-        # print('elaps', self.display_new_level_time_manager.elapsed_time)
-        # print('curr', self.display_new_level_time_manager.current_time)
-        # print('prev', self.display_new_level_time_manager.prev_time)
-        # print(self.display_new_level_time_manager.paused)
-        # print('rgb', rgb)
         return rgb
 
-    def update(self):
+    def update(self, len_enemies):
         """
         Check if the current level's time has elapsed and advance the level if necessary.
+        TODO: need to let everything exit the screen before the new level starts
         """
+        self.increase_difficulty_during_level()
         self.display_new_level = self.check_display_new_level_allowed()
-        # print(
-        #      f"\ncurr = {self.level_time_manager.current_time}\n, paus time = {self.level_time_manager.paused_time}\n, prev tot paused = {self.level_time_manager.prev_tot_paused_time}\n, elapsed = {self.level_time_manager.elapsed_time}\n, delta = {self.level_time_manager.delta_time}"
-        # )
         if self.level_time_manager.check_delta_time_elapsed():
+            self.new_level_approaching = True
+        if self.new_level_approaching and len_enemies == 0:
+            print('spawn allowed now')
+            self.new_level_approaching = False
             self.display_new_level_time_manager = TimeManager(delta_time=2000)
             self.display_new_level = True
             self.current_level += 1
             print(self.current_level)
-            self.adjust_level_settings()
+            self.adjust_level_settings_for_new_level()
 
-    def adjust_level_settings(self):
+    def increase_difficulty_during_level(self):
+        '''
+        increase the difficulty during each level by shortening the asteroid delta time and the spaceship delta time
+        '''
+        self.asteroid_time_manager.delta_time = max(300, self.asteroid_time_manager.delta_time - SHORTEN_AST_DELTA_TIME)
+        self.enemy_sship_time_manager.delta_time = max(300, self.enemy_sship_time_manager.delta_time - SHORTEN_SSHIP_DELTA_TIME)
+    
+    def adjust_level_settings_for_new_level(self):
         """
         Adjust game settings based on the current level.
         """
         print(f"Advancing to Level {self.current_level}")
         # Modify difficulty settings here
-        self.level_time_manager.delta_time = self.level_duration + 2000
-        self.asteroid_time_manager.delta_time = max(300, self.asteroid_time_manager.delta_time - 200)
+        self.level_time_manager.delta_time = self.level_duration + LEVEL_DURATION_INCREASE
+        self.asteroid_time_manager.delta_time = self.longest_asteroid_delta_time
+        self.enemy_sship_time_manager.delta_time = self.longest_enemy_sship_delta_time
+        # self.longest_asteroid_delta_time = max(300, self.longest_asteroid_delta_time - 200)
+        # self.asteroid_time_manager.delta_time = max(300, self.asteroid_time_manager.delta_time - 200)
 
     def reset(self):
         """
