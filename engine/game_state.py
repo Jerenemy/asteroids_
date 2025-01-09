@@ -6,7 +6,7 @@ from .high_scores_manager import HighScoresManager
 from .level_manager import LevelManager
 from sounds import SoundManager
 WAIT_AFTER_ENTERING_INITIALS_TIME = 1000
-from utils import AssetManager, is_mouse_pressed, check_quit, choose_color, X_SCRNSIZE, Y_SCRNSIZE, WHITE, BULLET_SPEED, KeysManager, SSHIP_DESTRUCTION_DURATION, LEFT_CLICK, MAX_X_SCRNSIZE, MAX_Y_SCRNSIZE, TimeManager, is_key_pressed, WAIT_AFTER_ENTERING_INITIALS_TIME, INVULNERABLE_TIME, BULLET_SIZE
+from utils import AssetManager, is_mouse_pressed, check_quit, choose_color, X_SCRNSIZE, Y_SCRNSIZE, WHITE, BULLET_SPEED, KeysManager, SSHIP_DESTRUCTION_DURATION, LEFT_CLICK, MAX_X_SCRNSIZE, MAX_Y_SCRNSIZE, TimeManager, is_key_pressed, WAIT_AFTER_ENTERING_INITIALS_TIME, INVULNERABLE_TIME, BULLET_SIZE, direction_overlap
 
 # INITIALIZE OBJECTS
 high_scores_manager = HighScoresManager()
@@ -25,7 +25,7 @@ class GameState:
     A class to manage the state of the game, including player stats, game progress,
     and transitions between different game states.
     """
-    def __init__(self, lives=3, points=0):
+    def __init__(self, lives, points=0):
         """
         Initialize the GameState with default values.
         """
@@ -144,17 +144,10 @@ class GameState:
             # need access to spaceship attributes to initialize bullet
             user_sship = object_manager.get_user_spaceship()
             x, y, direction, sship_speed = Bullet.get_bullet_launch_attributes(user_sship.x, user_sship.y, user_sship.size, user_sship.orientation, user_sship.speed)
-            bullet = UserBullet(x, y, BULLET_SIZE, BULLET_SPEED+sship_speed, direction, WHITE)
+            bullet_speed = BULLET_SPEED + sship_speed * direction_overlap(user_sship.direction, user_sship.orientation)
+            bullet = UserBullet(x, y, BULLET_SIZE, bullet_speed, direction, WHITE)
             object_manager.add_object(bullet)
-            sound_manager.play_event_sound('shoot')
-
-    # def handle_enemy_bullet_firing(self):
-    #     # object_manager.get_user_spaceship()
-    #     x, y, direction, sship_speed = Bullet.get_bullet_launch_attributes(user_sship.x, user_sship.y, user_sship.size, user_sship.orientation, user_sship.speed)
-    #     bullet = Bullet(x, y, 3, BULLET_SPEED+sship_speed, direction, WHITE)
-    #     object_manager.add_object(bullet)
-    #         # sound_manager.play_event_sound('shoot')
-            
+            sound_manager.play_event_sound('shoot') 
 
         
     def update_game(self):
@@ -231,11 +224,6 @@ class GameState:
                 enemy_sship = event['spaceship']
                 if isinstance(event['collided_with'], UserBullet):
                     self.add_score(enemy_sship.points)
-                # print(
-                #     enemy_sship.x, 
-                #     enemy_sship.y, 
-                #     'enemy sship destroyed'
-                # )
                 animation_manager.add_animation(
                     ParticleExplosionAnimation(enemy_sship.x, enemy_sship.y, enemy_sship.color, particle_count=enemy_sship.size//8, max_lifetime=enemy_sship.size//8)
                 )

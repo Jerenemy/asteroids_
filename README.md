@@ -95,3 +95,22 @@ Add 3 new states: 'game_over', 'new_high_score', 'game_over_menu', (change name 
 - 'game_over': immediately after the spaceship dies, display only the GAME OVER text in middle of screen
 - 'game_over_menu': after timer runs out, transition from 'game_over' to 'game_over_menu', display the hud and high scores (assuming no new high score)
 - new_high_score: after game_over timer runs out, if new high score is true, display the text giving the player directions, their high score and type, and each of their initials input so far. transition out of this state when the length of the initials list is equal to 3. and then wipe the initials list after transitioning out of the state into the 'game_over_menu' state, first storing the new high score. ONLY NOW is the high score calculated. 
+
+# Updates: 1/9/25
+- Enemy spaceships come in 2 sized: one small (fast, worth more points), one large (slow, worth less points). They have random chance to move in a 45 degree angle from their trajectory. They can collide with the user sship, user bullets, and other asteroids. Not sure if they can collide with enemy sships, enemy bullets.
+- Added realistic speed component to firing bullets using dot product: if fire in same direction, add sship speed from bullet speed; if fire in opposite direction, subtract sship speed from bullet speed
+- Added that when level finished, waits until all objects gone before spawning new objects. 
+### Small bug: 
+- Would prefer if the new level timer didn't actually start until all objects have left screen. 
+    - That would require either restructuring the time_manager logic. 
+    - One way would be to add a similar thing like "Paused" and subtract from the timer. That would be really annoying. 
+    - Would be nice if could just change a class variable and then all timers (of a certain type) would **stop increasing**. 
+    - Would need to ensure that other timers don't also pause (eg invincibility timer), thus could make a Child class for all the spawning, level, sound counters. Then have something similar to paused. 
+
+## TODO:
+1. Add specifications
+2. Add more randomness in enemy bullet firing, asteroid splitting direction
+1. Fix Small Bug
+2. Compile for Mac
+3. Compile for website
+4. Build website, make clickable button to play game

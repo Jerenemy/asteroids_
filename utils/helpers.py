@@ -1,7 +1,7 @@
 from random import choice
 from .constants import WHITE, YELLOW, ORANGE, RED, GREEN, BLUE, PURPLE, Y_SCRNSIZE, DEG2RAD, RAD2DEG
 from pygame import display
-from math import atan
+from math import atan, radians, cos, sin
 
 def load_from_file(filepath):
     try:
@@ -76,3 +76,33 @@ def get_direction_to(origin_object, target_object):
     
 def flipcoin():
     return choice([True, False])
+
+
+
+
+def direction_overlap(angle1, angle2):
+    """
+    Takes two angles in degrees and returns a factor based on their alignment:
+    - Returns 1 if they are in the same direction.
+    - Returns -1 if they are in opposite directions.
+    - Returns 0 if they are perpendicular.
+
+    Args:
+        angle1 (float): The first angle in degrees (0 to 360).
+        angle2 (float): The second angle in degrees (0 to 360).
+
+    Returns:
+        float: A factor between -1 and 1.
+    """
+    # Convert angles to radians
+    angle1_rad = radians(angle1)
+    angle2_rad = radians(angle2)
+
+    # Convert angles to unit vectors
+    vector1 = (cos(angle1_rad), sin(angle1_rad))
+    vector2 = (cos(angle2_rad), sin(angle2_rad))
+
+    # Calculate dot product
+    dot_product = vector1[0] * vector2[0] + vector1[1] * vector2[1]
+
+    return dot_product

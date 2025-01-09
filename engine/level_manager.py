@@ -1,8 +1,8 @@
-from utils import TimeManager, AssetManager, SHORTEN_AST_DELTA_TIME, SHORTEN_SSHIP_DELTA_TIME, LEVEL_DURATION_INCREASE
+from utils import TimeManager, AssetManager, SHORTEN_AST_DELTA_TIME, SHORTEN_SSHIP_DELTA_TIME, LEVEL_DURATION_INCREASE, INITIAL_LEVEL_DURATION, INITIAL_ASTEROID_DELTA_TIME, INITIAL_SPACESHIP_DELTA_TIME, MIN_AST_DELTA_TIME, MIN_SSHIP_DELTA_TIME
 from sounds import LevelSoundManager
 
 class LevelManager:
-    def __init__(self, asset_manager: AssetManager, initial_level=1, level_duration=5000, asteroid_delta_time=3000, enemy_sship_delta_time=3000):
+    def __init__(self, asset_manager: AssetManager, initial_level=1, level_duration=INITIAL_LEVEL_DURATION, asteroid_delta_time=INITIAL_ASTEROID_DELTA_TIME, enemy_sship_delta_time=INITIAL_SPACESHIP_DELTA_TIME):
         """
         Initialize the LevelManager.
 
@@ -76,20 +76,20 @@ class LevelManager:
         if self.level_time_manager.check_delta_time_elapsed():
             self.new_level_approaching = True
         if self.new_level_approaching and len_enemies == 0:
-            print('spawn allowed now')
+            # print('spawn allowed now')
             self.new_level_approaching = False
             self.display_new_level_time_manager = TimeManager(delta_time=2000)
             self.display_new_level = True
             self.current_level += 1
-            print(self.current_level)
+            # print(self.current_level)
             self.adjust_level_settings_for_new_level()
 
     def increase_difficulty_during_level(self):
         '''
         increase the difficulty during each level by shortening the asteroid delta time and the spaceship delta time
         '''
-        self.asteroid_time_manager.delta_time = max(300, self.asteroid_time_manager.delta_time - SHORTEN_AST_DELTA_TIME)
-        self.enemy_sship_time_manager.delta_time = max(300, self.enemy_sship_time_manager.delta_time - SHORTEN_SSHIP_DELTA_TIME)
+        self.asteroid_time_manager.delta_time = max(MIN_AST_DELTA_TIME, self.asteroid_time_manager.delta_time - SHORTEN_AST_DELTA_TIME)
+        self.enemy_sship_time_manager.delta_time = max(MIN_SSHIP_DELTA_TIME, self.enemy_sship_time_manager.delta_time - SHORTEN_SSHIP_DELTA_TIME)
     
     def adjust_level_settings_for_new_level(self):
         """

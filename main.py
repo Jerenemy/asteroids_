@@ -1,11 +1,11 @@
 from pygame import init, time
 from engine.game_state import GameState
-from utils import FPS, cleanup
+from utils import FPS, cleanup, SPACESHIP_STARTING_LIVES
 
 def main():
     init()
     clock = time.Clock()
-    game_state = GameState(lives=2)
+    game_state = GameState(lives=SPACESHIP_STARTING_LIVES)
     while game_state.state != "exit":
         game_state.handle_events()
         game_state.update_game()

@@ -1,5 +1,5 @@
 from entities import Asteroid, Spaceship, UserSpaceship, UserBullet, EnemyBullet, Bullet, EnemySpaceship
-from utils import get_list_item_by_type, BULLET_SIZE, AUTO_BULLET_SPEED, WHITE, get_direction_to
+from utils import get_list_item_by_type, BULLET_SIZE, ENEMY_BULLET_SPEED, WHITE, get_direction_to, direction_overlap
 from random import choice
 
 
@@ -161,7 +161,8 @@ class ObjectManager:
             dir = get_direction_to(enemy_sship, target)
             if EnemySpaceship.chance_to_trigger(level):
                 x, y, direction, sship_speed = Bullet.get_bullet_launch_attributes(enemy_sship.x, enemy_sship.y, enemy_sship.size+10, dir, enemy_sship.speed)
-                blt = EnemyBullet(x, y, BULLET_SIZE, AUTO_BULLET_SPEED, direction, WHITE, lifetime=200)
+                bullet_speed = ENEMY_BULLET_SPEED + sship_speed * direction_overlap(enemy_sship.direction, dir) 
+                blt = EnemyBullet(x, y, BULLET_SIZE, bullet_speed, direction, WHITE, lifetime=200)
                 self.add_object(blt)
             
     
